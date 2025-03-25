@@ -5,8 +5,9 @@ import { motion } from 'framer-motion'
 
 import { fadeX } from '../../../FramerAnimations'
 import { ActionType } from '../../../slices/types'
-import type { StepAction, TextWithImage } from '../../../slices/types'
+import type { Credential, StepAction, TextWithImage } from '../../../slices/types'
 import { StepInformation } from '../components/StepInformation'
+import { AcceptCredentialAction } from './actions/AcceptCredentialAction'
 import { ChooseWalletAction } from './actions/ChooseWalletAction'
 import { SetupConnectionAction } from './actions/SetupConnectionAction'
 
@@ -20,6 +21,7 @@ export interface Props {
   connectionState?: string
   connectionId?: string
   issuerName?: string
+  credentials?: Credential[]
 }
 
 export const StepView: React.FC<Props> = (props: Props): ReactElement => {
@@ -33,6 +35,7 @@ export const StepView: React.FC<Props> = (props: Props): ReactElement => {
     connectionState,
     connectionId,
     issuerName,
+    credentials = [],
   } = props
 
   const getActionElements = () => {
@@ -54,6 +57,8 @@ export const StepView: React.FC<Props> = (props: Props): ReactElement => {
           )
         case ActionType.CHOOSE_WALLET:
           return <ChooseWalletAction nextStep={nextStep} />
+        case ActionType.ACCEPT_CREDENTIAL:
+          return <AcceptCredentialAction connectionId={connectionId ?? ''} credentials={credentials} />
         default:
           return <div />
       }

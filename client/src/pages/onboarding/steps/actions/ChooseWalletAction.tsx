@@ -52,7 +52,7 @@ export const ChooseWalletAction: React.FC<Props> = (props: Props) => {
   return (
     <>
       <motion.div
-        className="flex flex-col md:px-4 h-full max-h-96 overflow-x-hidden"
+        className="flex flex-col md:px-4 max-h-96 overflow-x-hidden"
         variants={rowContainer}
         initial="hidden"
         animate="show"
