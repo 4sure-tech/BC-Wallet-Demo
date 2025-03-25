@@ -3,7 +3,7 @@ import type { Dispatch } from 'react'
 import { track } from 'insights-js'
 
 import { setOnboardingStep } from '../slices/onboarding/onboardingSlice'
-import { Step } from '../slices/types'
+import type { Step } from '../slices/types'
 
 export const setOnboardingProgress = (dispatch: Dispatch<any>, step: Step): void => {
   dispatch(setOnboardingStep(step))

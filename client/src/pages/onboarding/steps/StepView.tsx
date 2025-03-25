@@ -1,10 +1,14 @@
-import React, { ReactElement } from 'react'
+import type { ReactElement } from 'react'
+import React from 'react'
+
 import { motion } from 'framer-motion'
+
 import { fadeX } from '../../../FramerAnimations'
-import { StepInformation } from '../components/StepInformation'
-import { SetupConnectionAction } from './actions/SetupConnectionAction';
-import { ActionType } from '../../../slices/types';
+import { ActionType } from '../../../slices/types'
 import type { StepAction, TextWithImage } from '../../../slices/types'
+import { StepInformation } from '../components/StepInformation'
+import { ChooseWalletAction } from './actions/ChooseWalletAction'
+import { SetupConnectionAction } from './actions/SetupConnectionAction'
 
 export interface Props {
   title: string
@@ -28,14 +32,15 @@ export const StepView: React.FC<Props> = (props: Props): ReactElement => {
     invitationUrl,
     connectionState,
     connectionId,
-    issuerName
+    issuerName,
   } = props
 
   const getActionElements = () => {
     return actions.map((action, index) => {
       switch (action.actionType) {
-        case ActionType.CONNECT: {
-          return <SetupConnectionAction
+        case ActionType.CONNECT:
+          return (
+            <SetupConnectionAction
               key={index}
               connectionId={connectionId}
               nextStep={nextStep}
@@ -45,10 +50,12 @@ export const StepView: React.FC<Props> = (props: Props): ReactElement => {
               disableSkipConnection={false}
               connectionState={connectionState}
               //backgroundImage={} // FIXME we need to support a background image
-          />
-        }
+            />
+          )
+        case ActionType.CHOOSE_WALLET:
+          return <ChooseWalletAction nextStep={nextStep} />
         default:
-          return <div/>
+          return <div />
       }
     })
   }
