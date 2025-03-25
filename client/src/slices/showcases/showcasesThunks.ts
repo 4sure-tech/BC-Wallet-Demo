@@ -24,8 +24,8 @@ export const fetchShowcaseBySlug = createAsyncThunk(
         }
 
         const steps = scenario.steps.map((step: Step) => {
-          const actions = step.actions.map(action => ({
-            actionType: action.actionType
+          const actions = step.actions.map((action) => ({
+            actionType: action.actionType,
           }))
 
           return {
@@ -33,7 +33,7 @@ export const fetchShowcaseBySlug = createAsyncThunk(
             description: step.description,
             order: step.order,
             ...(step.asset && { asset: step.asset.id }),
-            actions
+            actions,
           }
         })
 
