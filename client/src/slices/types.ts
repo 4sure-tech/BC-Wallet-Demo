@@ -174,6 +174,7 @@ export interface Showcase {
 export interface Scenario {
   persona: Persona
   steps: Step[]
+  issuer?: Issuer
 }
 
 export interface Persona {
@@ -197,7 +198,11 @@ export interface StepAction {
 }
 
 export enum ActionType {
-  CONNECT = "CONNECT",
-  CHOOSE_WALLET = "CHOOSE_WALLET",
-  ACCEPT_CREDENTIAL = "ACCEPT_CREDENTIAL",
+  CONNECT = 'CONNECT',
+  CHOOSE_WALLET = 'CHOOSE_WALLET',
+  ACCEPT_CREDENTIAL = 'ACCEPT_CREDENTIAL',
+}
+
+export interface Issuer {
+  name: string
 }

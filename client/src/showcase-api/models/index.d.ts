@@ -63,6 +63,7 @@ export * from './Showcase'
 export * from './ShowcaseExpand'
 export * from './ShowcaseRequest'
 export * from './ShowcaseResponse'
+export * from './ShowcaseScenariosInner';
 export * from './ShowcaseStatus'
 export * from './ShowcasesResponse'
 export * from './Source'

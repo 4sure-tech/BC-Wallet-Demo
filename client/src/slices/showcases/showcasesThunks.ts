@@ -1,7 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
 import * as Api from '../../api/ShowcaseApi'
-import type { Scenario, Step } from '../../showcase-api'
+import type { IssuanceScenario, ShowcaseScenariosInner, Step } from '../../showcase-api'
+import { ScenarioType } from '../../showcase-api'
 import type { Showcase } from '../types'
 
 export const fetchShowcaseBySlug = createAsyncThunk(
@@ -14,7 +15,7 @@ export const fetchShowcaseBySlug = createAsyncThunk(
         return Promise.reject(Error('No showcase found in response'))
       }
 
-      const scenarios = response.data.showcase.scenarios.map((scenario: Scenario) => {
+      const scenarios = response.data.showcase.scenarios.map((scenario: ShowcaseScenariosInner) => {
         if (scenario.personas === undefined || scenario.personas?.length === 0) {
           throw new Error('No personas found in scenario')
         }
@@ -24,8 +25,8 @@ export const fetchShowcaseBySlug = createAsyncThunk(
         }
 
         const steps = scenario.steps.map((step: Step) => {
-          const actions = step.actions.map(action => ({
-            actionType: action.actionType
+          const actions = step.actions.map((action) => ({
+            actionType: action.actionType,
           }))
 
           return {
@@ -33,7 +34,7 @@ export const fetchShowcaseBySlug = createAsyncThunk(
             description: step.description,
             order: step.order,
             ...(step.asset && { asset: step.asset.id }),
-            actions
+            actions,
           }
         })
 
@@ -45,6 +46,11 @@ export const fetchShowcaseBySlug = createAsyncThunk(
             ...(scenario.personas[0].headshotImage && { headshotImage: scenario.personas[0].headshotImage?.id }),
             ...(scenario.personas[0].bodyImage && { bodyImage: scenario.personas[0].bodyImage?.id }),
           },
+          ...(scenario.type === ScenarioType.Issuance && {
+            issuer: {
+              name: (<IssuanceScenario>scenario).issuer.name,
+            },
+          }),
           steps,
         }
       })

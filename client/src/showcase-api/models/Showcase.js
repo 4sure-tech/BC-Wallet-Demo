@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -22,7 +22,7 @@ const CredentialDefinition_1 = require("./CredentialDefinition");
 const ShowcaseStatus_1 = require("./ShowcaseStatus");
 const Persona_1 = require("./Persona");
 const Asset_1 = require("./Asset");
-const Scenario_1 = require("./Scenario");
+const ShowcaseScenariosInner_1 = require("./ShowcaseScenariosInner");
 /**
  * Check if a given object implements the Showcase interface.
  */
@@ -65,7 +65,7 @@ function ShowcaseFromJSONTyped(json, ignoreDiscriminator) {
         'description': json['description'],
         'status': (0, ShowcaseStatus_1.ShowcaseStatusFromJSON)(json['status']),
         'hidden': json['hidden'],
-        'scenarios': (json['scenarios'].map(Scenario_1.ScenarioFromJSON)),
+        'scenarios': (json['scenarios'].map(ShowcaseScenariosInner_1.ShowcaseScenariosInnerFromJSON)),
         'credentialDefinitions': (json['credentialDefinitions'].map(CredentialDefinition_1.CredentialDefinitionFromJSON)),
         'personas': (json['personas'].map(Persona_1.PersonaFromJSON)),
         'bannerImage': json['bannerImage'] == null ? undefined : (0, Asset_1.AssetFromJSON)(json['bannerImage']),
@@ -88,7 +88,7 @@ function ShowcaseToJSONTyped(value, ignoreDiscriminator = false) {
         'description': value['description'],
         'status': (0, ShowcaseStatus_1.ShowcaseStatusToJSON)(value['status']),
         'hidden': value['hidden'],
-        'scenarios': (value['scenarios'].map(Scenario_1.ScenarioToJSON)),
+        'scenarios': (value['scenarios'].map(ShowcaseScenariosInner_1.ShowcaseScenariosInnerToJSON)),
         'credentialDefinitions': (value['credentialDefinitions'].map(CredentialDefinition_1.CredentialDefinitionToJSON)),
         'personas': (value['personas'].map(Persona_1.PersonaToJSON)),
         'bannerImage': (0, Asset_1.AssetToJSON)(value['bannerImage']),

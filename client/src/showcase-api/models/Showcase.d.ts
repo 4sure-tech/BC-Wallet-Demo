@@ -9,103 +9,102 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import type { Asset } from './Asset'
-import type { CredentialDefinition } from './CredentialDefinition'
-import type { Persona } from './Persona'
-import type { Scenario } from './Scenario'
-import type { ShowcaseStatus } from './ShowcaseStatus'
-
+import type { CredentialDefinition } from './CredentialDefinition';
+import type { ShowcaseStatus } from './ShowcaseStatus';
+import type { Persona } from './Persona';
+import type { Asset } from './Asset';
+import type { ShowcaseScenariosInner } from './ShowcaseScenariosInner';
 /**
  *
  * @export
  * @interface Showcase
  */
 export interface Showcase {
-  /**
-   * Unique identifier for the showcase
-   * @type {string}
-   * @memberof Showcase
-   */
-  id: string
-  /**
-   * Name of the showcase
-   * @type {string}
-   * @memberof Showcase
-   */
-  name: string
-  /**
-   * URL-friendly identifier for the showcase
-   * @type {string}
-   * @memberof Showcase
-   */
-  slug: string
-  /**
-   * Description of the showcase
-   * @type {string}
-   * @memberof Showcase
-   */
-  description: string
-  /**
-   *
-   * @type {ShowcaseStatus}
-   * @memberof Showcase
-   */
-  status: ShowcaseStatus
-  /**
-   * Whether the showcase is hidden from public view
-   * @type {boolean}
-   * @memberof Showcase
-   */
-  hidden: boolean
-  /**
-   * List of scenarios in this showcase
-   * @type {Array<Scenario>}
-   * @memberof Showcase
-   */
-  scenarios: Array<Scenario>
-  /**
-   * List of credential definitions used in this showcase
-   * @type {Array<CredentialDefinition>}
-   * @memberof Showcase
-   */
-  credentialDefinitions: Array<CredentialDefinition>
-  /**
-   * List of personas involved in this showcase
-   * @type {Array<Persona>}
-   * @memberof Showcase
-   */
-  personas: Array<Persona>
-  /**
-   *
-   * @type {Asset}
-   * @memberof Showcase
-   */
-  bannerImage?: Asset
-  /**
-   * Message to display when the showcase is completed
-   * @type {string}
-   * @memberof Showcase
-   */
-  completionMessage?: string
-  /**
-   * Date and time the showcase was created
-   * @type {Date}
-   * @memberof Showcase
-   */
-  createdAt: Date
-  /**
-   * Date and time the showcase was last updated
-   * @type {Date}
-   * @memberof Showcase
-   */
-  updatedAt: Date
+    /**
+     * Unique identifier for the showcase
+     * @type {string}
+     * @memberof Showcase
+     */
+    id: string;
+    /**
+     * Name of the showcase
+     * @type {string}
+     * @memberof Showcase
+     */
+    name: string;
+    /**
+     * URL-friendly identifier for the showcase
+     * @type {string}
+     * @memberof Showcase
+     */
+    slug: string;
+    /**
+     * Description of the showcase
+     * @type {string}
+     * @memberof Showcase
+     */
+    description: string;
+    /**
+     *
+     * @type {ShowcaseStatus}
+     * @memberof Showcase
+     */
+    status: ShowcaseStatus;
+    /**
+     * Whether the showcase is hidden from public view
+     * @type {boolean}
+     * @memberof Showcase
+     */
+    hidden: boolean;
+    /**
+     * List of scenarios in this showcase
+     * @type {Array<ShowcaseScenariosInner>}
+     * @memberof Showcase
+     */
+    scenarios: Array<ShowcaseScenariosInner>;
+    /**
+     * List of credential definitions used in this showcase
+     * @type {Array<CredentialDefinition>}
+     * @memberof Showcase
+     */
+    credentialDefinitions: Array<CredentialDefinition>;
+    /**
+     * List of personas involved in this showcase
+     * @type {Array<Persona>}
+     * @memberof Showcase
+     */
+    personas: Array<Persona>;
+    /**
+     *
+     * @type {Asset}
+     * @memberof Showcase
+     */
+    bannerImage?: Asset;
+    /**
+     * Message to display when the showcase is completed
+     * @type {string}
+     * @memberof Showcase
+     */
+    completionMessage?: string;
+    /**
+     * Date and time the showcase was created
+     * @type {Date}
+     * @memberof Showcase
+     */
+    createdAt: Date;
+    /**
+     * Date and time the showcase was last updated
+     * @type {Date}
+     * @memberof Showcase
+     */
+    updatedAt: Date;
 }
 /**
  * Check if a given object implements the Showcase interface.
  */
-export declare function instanceOfShowcase(value: object): value is Showcase
-export declare function ShowcaseFromJSON(json: any): Showcase
-export declare function ShowcaseFromJSONTyped(json: any, ignoreDiscriminator: boolean): Showcase
-export declare function ShowcaseToJSON(json: any): Showcase
-export declare function ShowcaseToJSONTyped(value?: Showcase | null, ignoreDiscriminator?: boolean): any
+export declare function instanceOfShowcase(value: object): value is Showcase;
+export declare function ShowcaseFromJSON(json: any): Showcase;
+export declare function ShowcaseFromJSONTyped(json: any, ignoreDiscriminator: boolean): Showcase;
+export declare function ShowcaseToJSON(json: any): Showcase;
+export declare function ShowcaseToJSONTyped(value?: Showcase | null, ignoreDiscriminator?: boolean): any;
 //# sourceMappingURL=Showcase.d.ts.map

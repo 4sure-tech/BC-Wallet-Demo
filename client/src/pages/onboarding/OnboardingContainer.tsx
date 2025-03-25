@@ -1,31 +1,30 @@
-import type {ReactElement} from 'react'
-import React, {useEffect, useState} from 'react'
-import {isMobile} from 'react-device-detect'
-import {FiLogOut} from 'react-icons/fi'
-import {useNavigate} from 'react-router-dom'
+import type { ReactElement } from 'react'
+import React, { useEffect, useState } from 'react'
+import { isMobile } from 'react-device-detect'
+import { FiLogOut } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 
-import {trackSelfDescribingEvent} from '@snowplow/browser-tracker'
-import {AnimatePresence, motion} from 'framer-motion'
+import { trackSelfDescribingEvent } from '@snowplow/browser-tracker'
+import { AnimatePresence, motion } from 'framer-motion'
 
-import {basePath} from '../../utils/BasePath'
-import {showcaseServerBaseUrl} from '../../api/BaseUrl'
-import {fadeDelay, fadeExit} from '../../FramerAnimations'
-import {Modal} from '../../components/Modal'
-import {useAppDispatch} from '../../hooks/hooks'
-import {clearConnection} from '../../slices/connection/connectionSlice'
-import {useCredentials} from '../../slices/credentials/credentialsSelectors'
-import {clearCredentials} from '../../slices/credentials/credentialsSlice'
-import {completeOnboarding, setScenario} from '../../slices/onboarding/onboardingSlice'
-import {setOnboardingProgress} from '../../utils/OnboardingUtils'
-import {OnboardingBottomNav} from './components/OnboardingBottomNav'
-import {PersonaContent} from './components/PersonaContent'
-import {StepView} from './steps/StepView'
-import {PickPersona} from './steps/PickPersona'
-import {SetupCompleted} from './steps/SetupCompleted'
-import {isConnected} from '../../utils/Helpers'
-import type {Persona, Scenario, Step} from '../../slices/types'
-import {ActionType} from '../../slices/types';
-
+import { showcaseServerBaseUrl } from '../../api/BaseUrl'
+import { Modal } from '../../components/Modal'
+import { fadeDelay, fadeExit } from '../../FramerAnimations'
+import { useAppDispatch } from '../../hooks/hooks'
+import { clearConnection } from '../../slices/connection/connectionSlice'
+//import { useCredentials } from '../../slices/credentials/credentialsSelectors'
+import { clearCredentials } from '../../slices/credentials/credentialsSlice'
+import { completeOnboarding, setScenario } from '../../slices/onboarding/onboardingSlice'
+import type { Persona, Scenario, Step } from '../../slices/types'
+import { ActionType } from '../../slices/types'
+import { basePath } from '../../utils/BasePath'
+import { isConnected } from '../../utils/Helpers'
+import { setOnboardingProgress } from '../../utils/OnboardingUtils'
+import { OnboardingBottomNav } from './components/OnboardingBottomNav'
+import { PersonaContent } from './components/PersonaContent'
+import { PickPersona } from './steps/PickPersona'
+import { SetupCompleted } from './steps/SetupCompleted'
+import { StepView } from './steps/StepView'
 
 export interface Props {
   scenarios: Scenario[]
@@ -45,26 +44,26 @@ export const OnboardingContainer: React.FC<Props> = ({
   invitationUrl,
 }) => {
   const dispatch = useAppDispatch()
-  const { issuedCredentials } = useCredentials()
-  const currentScenario = scenarios.find((scenario) => scenario.persona?.id === currentPersona?.id)
-  // TODO could be turned into useEffect
+  const [currentScenario, setCurrentScenario] = useState<Scenario | undefined>()
+
+  useEffect((): void => {
+    setCurrentScenario(scenarios.find((scenario) => scenario.persona?.id === currentPersona?.id))
+  }, [scenarios, currentPersona])
 
   useEffect((): void => {
     dispatch(setScenario(currentScenario))
     if (currentScenario) {
       setOnboardingProgress(dispatch, currentScenario.steps[0])
     }
-
   }, [currentScenario])
 
   const connectionCompleted = isConnected(connectionState as string)
   //const credentials: any[] = [] //currentPersona?.onboarding.find((step: any) => step.screenId === onboardingStep)?.credentials // TODO we need credentials
   //const credentialsAccepted = credentials?.every((cred: any) => issuedCredentials.includes(cred.name))
   const isBackDisabled: boolean = !currentStep || currentStep.order === 1
-  const isForwardDisabled: boolean =
-      !currentStep ||
-      currentScenario?.steps.length === currentStep.order ||
-      ((currentStep?.actions?.some(action => action.actionType === ActionType.CONNECT) ?? false) && !connectionCompleted)
+  const isForwardDisabled: boolean = !currentStep || currentScenario?.steps.length === currentStep.order ||
+  ((currentStep?.actions?.some((action) => action.actionType === ActionType.CONNECT) ?? false) &&
+    !connectionCompleted)
 
   const nextOnboardingPage = async (): Promise<void> => {
     const nextStep = currentScenario?.steps[currentStep !== undefined ? currentStep.order : 0]
@@ -85,8 +84,7 @@ export const OnboardingContainer: React.FC<Props> = ({
   }
 
   const prevOnboardingPage = async (): Promise<void> => {
-    console.log(`prevOnboardingPage step order: ${currentStep?.order}`)
-    const prevStep = currentStep && currentScenario?.steps[currentStep.order - 2];
+    const prevStep = currentStep && currentScenario?.steps[currentStep.order - 2]
     if (prevStep) {
       trackSelfDescribingEvent({
         event: {
@@ -116,7 +114,8 @@ export const OnboardingContainer: React.FC<Props> = ({
     } else if (currentScenario?.steps.length === currentStep.order) {
       return <SetupCompleted title={currentStep.title} text={currentStep.description} />
     } else {
-      return <StepView
+      return (
+        <StepView
           title={currentStep.title}
           text={currentStep.description}
           actions={currentStep.actions}
@@ -124,7 +123,9 @@ export const OnboardingContainer: React.FC<Props> = ({
           connectionState={connectionState}
           invitationUrl={invitationUrl}
           connectionId={connectionId}
-      />
+          issuerName={currentScenario?.issuer?.name}
+        />
+      )
     }
   }
 

@@ -81,6 +81,7 @@ __exportStar(require("./PresentationScenarioRequest"), exports);
 __exportStar(require("./PresentationScenarioResponse"), exports);
 __exportStar(require("./PresentationScenariosResponse"), exports);
 __exportStar(require("./RelyingPartiesResponse"), exports);
+__exportStar(require("./ShowcaseScenariosInner"), exports);
 __exportStar(require("./RelyingParty"), exports);
 __exportStar(require("./RelyingPartyRequest"), exports);
 __exportStar(require("./RelyingPartyResponse"), exports);

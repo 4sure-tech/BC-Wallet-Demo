@@ -9,63 +9,95 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import type { StepRequest } from './StepRequest'
-
+import type { RelyingParty } from './RelyingParty';
+import type { Persona } from './Persona';
+import type { Step } from './Step';
 /**
- *
+ * Scenario specialization for credential presentation
  * @export
- * @interface PresentationScenarioRequest
+ * @interface PresentationScenario
  */
-export interface PresentationScenarioRequest {
+export interface PresentationScenario {
+  /**
+   * Unique identifier for the scenario
+   * @type {string}
+   * @memberof PresentationScenario
+   */
+  id: string;
   /**
    * Name of the scenario
    * @type {string}
-   * @memberof PresentationScenarioRequest
+   * @memberof PresentationScenario
    */
-  name: string
+  name: string;
+  /**
+   * URL-friendly identifier for the scenario
+   * @type {string}
+   * @memberof PresentationScenario
+   */
+  slug: string;
   /**
    * Detailed description of the scenario
    * @type {string}
-   * @memberof PresentationScenarioRequest
+   * @memberof PresentationScenario
    */
-  description: string
-  /**
-   * Ordered list of steps in the scenario
-   * @type {Array<StepRequest>}
-   * @memberof PresentationScenarioRequest
-   */
-  steps: Array<StepRequest>
-  /**
-   * References to personas used in this scenario
-   * @type {Array<string>}
-   * @memberof PresentationScenarioRequest
-   */
-  personas: Array<string>
-  /**
-   * Whether the workflow is hidden from the user
-   * @type {boolean}
-   * @memberof PresentationScenarioRequest
-   */
-  hidden?: boolean
+  description: string;
   /**
    *
    * @type {string}
-   * @memberof PresentationScenarioRequest
+   * @memberof PresentationScenario
    */
-  relyingParty: string
+  type: PresentationScenarioTypeEnum;
+  /**
+   * Ordered list of steps in the scenario
+   * @type {Array<Step>}
+   * @memberof PresentationScenario
+   */
+  steps: Array<Step>;
+  /**
+   * References to personas used in this scenario
+   * @type {Array<Persona>}
+   * @memberof PresentationScenario
+   */
+  personas: Array<Persona>;
+  /**
+   * Whether the workflow is hidden from the user
+   * @type {boolean}
+   * @memberof PresentationScenario
+   */
+  hidden?: boolean;
+  /**
+   * Date and time the scenario was created
+   * @type {Date}
+   * @memberof PresentationScenario
+   */
+  createdAt: Date;
+  /**
+   * Date and time the scenario was last updated
+   * @type {Date}
+   * @memberof PresentationScenario
+   */
+  updatedAt: Date;
+  /**
+   *
+   * @type {RelyingParty}
+   * @memberof PresentationScenario
+   */
+  relyingParty: RelyingParty;
 }
 /**
- * Check if a given object implements the PresentationScenarioRequest interface.
+ * @export
  */
-export declare function instanceOfPresentationScenarioRequest(value: object): value is PresentationScenarioRequest
-export declare function PresentationScenarioRequestFromJSON(json: any): PresentationScenarioRequest
-export declare function PresentationScenarioRequestFromJSONTyped(
-  json: any,
-  ignoreDiscriminator: boolean
-): PresentationScenarioRequest
-export declare function PresentationScenarioRequestToJSON(json: any): PresentationScenarioRequest
-export declare function PresentationScenarioRequestToJSONTyped(
-  value?: PresentationScenarioRequest | null,
-  ignoreDiscriminator?: boolean
-): any
-//# sourceMappingURL=PresentationScenarioRequest.d.ts.map
+export declare const PresentationScenarioTypeEnum: {
+  readonly Presentation: "PRESENTATION";
+};
+export type PresentationScenarioTypeEnum = typeof PresentationScenarioTypeEnum[keyof typeof PresentationScenarioTypeEnum];
+/**
+ * Check if a given object implements the PresentationScenario interface.
+ */
+export declare function instanceOfPresentationScenario(value: object): value is PresentationScenario;
+export declare function PresentationScenarioFromJSON(json: any): PresentationScenario;
+export declare function PresentationScenarioFromJSONTyped(json: any, ignoreDiscriminator: boolean): PresentationScenario;
+export declare function PresentationScenarioToJSON(json: any): PresentationScenario;
+export declare function PresentationScenarioToJSONTyped(value?: PresentationScenario | null, ignoreDiscriminator?: boolean): any;
+//# sourceMappingURL=PresentationScenario.d.ts.map

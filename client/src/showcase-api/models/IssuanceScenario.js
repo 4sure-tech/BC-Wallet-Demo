@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -13,6 +13,7 @@
  * Do not edit the class manually.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.IssuanceScenarioTypeEnum = void 0;
 exports.instanceOfIssuanceScenario = instanceOfIssuanceScenario;
 exports.IssuanceScenarioFromJSON = IssuanceScenarioFromJSON;
 exports.IssuanceScenarioFromJSONTyped = IssuanceScenarioFromJSONTyped;
@@ -20,14 +21,34 @@ exports.IssuanceScenarioToJSON = IssuanceScenarioToJSON;
 exports.IssuanceScenarioToJSONTyped = IssuanceScenarioToJSONTyped;
 const Persona_1 = require("./Persona");
 const Issuer_1 = require("./Issuer");
-const Asset_1 = require("./Asset");
 const Step_1 = require("./Step");
-const ScenarioType_1 = require("./ScenarioType");
+/**
+ * @export
+ */
+exports.IssuanceScenarioTypeEnum = {
+    Issuance: 'ISSUANCE'
+};
 /**
  * Check if a given object implements the IssuanceScenario interface.
  */
 function instanceOfIssuanceScenario(value) {
     if (!('id' in value) || value['id'] === undefined)
+        return false;
+    if (!('name' in value) || value['name'] === undefined)
+        return false;
+    if (!('slug' in value) || value['slug'] === undefined)
+        return false;
+    if (!('description' in value) || value['description'] === undefined)
+        return false;
+    if (!('type' in value) || value['type'] === undefined)
+        return false;
+    if (!('steps' in value) || value['steps'] === undefined)
+        return false;
+    if (!('personas' in value) || value['personas'] === undefined)
+        return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined)
+        return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined)
         return false;
     if (!('issuer' in value) || value['issuer'] === undefined)
         return false;
@@ -42,16 +63,15 @@ function IssuanceScenarioFromJSONTyped(json, ignoreDiscriminator) {
     }
     return {
         'id': json['id'],
-        'name': json['name'] == null ? undefined : json['name'],
-        'slug': json['slug'] == null ? undefined : json['slug'],
-        'description': json['description'] == null ? undefined : json['description'],
-        'type': json['type'] == null ? undefined : (0, ScenarioType_1.ScenarioTypeFromJSON)(json['type']),
-        'steps': json['steps'] == null ? undefined : (json['steps'].map(Step_1.StepFromJSON)),
-        'personas': json['personas'] == null ? undefined : (json['personas'].map(Persona_1.PersonaFromJSON)),
+        'name': json['name'],
+        'slug': json['slug'],
+        'description': json['description'],
+        'type': json['type'],
+        'steps': (json['steps'].map(Step_1.StepFromJSON)),
+        'personas': (json['personas'].map(Persona_1.PersonaFromJSON)),
         'hidden': json['hidden'] == null ? undefined : json['hidden'],
-        'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
-        'updatedAt': json['updatedAt'] == null ? undefined : (new Date(json['updatedAt'])),
-        'bannerImage': json['bannerImage'] == null ? undefined : (0, Asset_1.AssetFromJSON)(json['bannerImage']),
+        'createdAt': (new Date(json['createdAt'])),
+        'updatedAt': (new Date(json['updatedAt'])),
         'issuer': (0, Issuer_1.IssuerFromJSON)(json['issuer']),
     };
 }
@@ -67,13 +87,12 @@ function IssuanceScenarioToJSONTyped(value, ignoreDiscriminator = false) {
         'name': value['name'],
         'slug': value['slug'],
         'description': value['description'],
-        'type': (0, ScenarioType_1.ScenarioTypeToJSON)(value['type']),
-        'steps': value['steps'] == null ? undefined : (value['steps'].map(Step_1.StepToJSON)),
-        'personas': value['personas'] == null ? undefined : (value['personas'].map(Persona_1.PersonaToJSON)),
+        'type': value['type'],
+        'steps': (value['steps'].map(Step_1.StepToJSON)),
+        'personas': (value['personas'].map(Persona_1.PersonaToJSON)),
         'hidden': value['hidden'],
-        'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
-        'updatedAt': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
-        'bannerImage': (0, Asset_1.AssetToJSON)(value['bannerImage']),
+        'createdAt': ((value['createdAt']).toISOString()),
+        'updatedAt': ((value['updatedAt']).toISOString()),
         'issuer': (0, Issuer_1.IssuerToJSON)(value['issuer']),
     };
 }

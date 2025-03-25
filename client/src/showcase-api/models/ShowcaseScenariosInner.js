@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -17,8 +17,8 @@ exports.ShowcaseScenariosInnerFromJSON = ShowcaseScenariosInnerFromJSON;
 exports.ShowcaseScenariosInnerFromJSONTyped = ShowcaseScenariosInnerFromJSONTyped;
 exports.ShowcaseScenariosInnerToJSON = ShowcaseScenariosInnerToJSON;
 exports.ShowcaseScenariosInnerToJSONTyped = ShowcaseScenariosInnerToJSONTyped;
-const Id_1 = require("./Id");
-const Scenario_1 = require("./Scenario");
+const IssuanceScenario_1 = require("./IssuanceScenario");
+const PresentationScenario_1 = require("./PresentationScenario");
 function ShowcaseScenariosInnerFromJSON(json) {
     return ShowcaseScenariosInnerFromJSONTyped(json, false);
 }
@@ -26,13 +26,14 @@ function ShowcaseScenariosInnerFromJSONTyped(json, ignoreDiscriminator) {
     if (json == null) {
         return json;
     }
-    if ((0, Id_1.instanceOfId)(json)) {
-        return (0, Id_1.IdFromJSONTyped)(json, true);
+    switch (json['type']) {
+        case 'ISSUANCE':
+            return Object.assign({}, (0, IssuanceScenario_1.IssuanceScenarioFromJSONTyped)(json, true), { type: 'ISSUANCE' });
+        case 'PRESENTATION':
+            return Object.assign({}, (0, PresentationScenario_1.PresentationScenarioFromJSONTyped)(json, true), { type: 'PRESENTATION' });
+        default:
+            throw new Error(`No variant of ShowcaseScenariosInner exists with 'type=${json['type']}'`);
     }
-    if ((0, Scenario_1.instanceOfScenario)(json)) {
-        return (0, Scenario_1.ScenarioFromJSONTyped)(json, true);
-    }
-    return {};
 }
 function ShowcaseScenariosInnerToJSON(json) {
     return ShowcaseScenariosInnerToJSONTyped(json, false);
@@ -41,12 +42,13 @@ function ShowcaseScenariosInnerToJSONTyped(value, ignoreDiscriminator = false) {
     if (value == null) {
         return value;
     }
-    if ((0, Id_1.instanceOfId)(value)) {
-        return (0, Id_1.IdToJSON)(value);
+    switch (value['type']) {
+        case 'ISSUANCE':
+            return Object.assign({}, (0, IssuanceScenario_1.IssuanceScenarioToJSON)(value), { type: 'ISSUANCE' });
+        case 'PRESENTATION':
+            return Object.assign({}, (0, PresentationScenario_1.PresentationScenarioToJSON)(value), { type: 'PRESENTATION' });
+        default:
+            throw new Error(`No variant of ShowcaseScenariosInner exists with 'type=${value['type']}'`);
     }
-    if ((0, Scenario_1.instanceOfScenario)(value)) {
-        return (0, Scenario_1.ScenarioToJSON)(value);
-    }
-    return {};
 }
 //# sourceMappingURL=ShowcaseScenariosInner.js.map

@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -13,58 +13,87 @@
  * Do not edit the class manually.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.instanceOfPresentationScenarioRequest = instanceOfPresentationScenarioRequest;
-exports.PresentationScenarioRequestFromJSON = PresentationScenarioRequestFromJSON;
-exports.PresentationScenarioRequestFromJSONTyped = PresentationScenarioRequestFromJSONTyped;
-exports.PresentationScenarioRequestToJSON = PresentationScenarioRequestToJSON;
-exports.PresentationScenarioRequestToJSONTyped = PresentationScenarioRequestToJSONTyped;
-const StepRequest_1 = require("./StepRequest");
+exports.PresentationScenarioTypeEnum = void 0;
+exports.instanceOfPresentationScenario = instanceOfPresentationScenario;
+exports.PresentationScenarioFromJSON = PresentationScenarioFromJSON;
+exports.PresentationScenarioFromJSONTyped = PresentationScenarioFromJSONTyped;
+exports.PresentationScenarioToJSON = PresentationScenarioToJSON;
+exports.PresentationScenarioToJSONTyped = PresentationScenarioToJSONTyped;
+const RelyingParty_1 = require("./RelyingParty");
+const Persona_1 = require("./Persona");
+const Step_1 = require("./Step");
 /**
- * Check if a given object implements the PresentationScenarioRequest interface.
+ * @export
  */
-function instanceOfPresentationScenarioRequest(value) {
+exports.PresentationScenarioTypeEnum = {
+    Presentation: 'PRESENTATION'
+};
+/**
+ * Check if a given object implements the PresentationScenario interface.
+ */
+function instanceOfPresentationScenario(value) {
+    if (!('id' in value) || value['id'] === undefined)
+        return false;
     if (!('name' in value) || value['name'] === undefined)
         return false;
+    if (!('slug' in value) || value['slug'] === undefined)
+        return false;
     if (!('description' in value) || value['description'] === undefined)
+        return false;
+    if (!('type' in value) || value['type'] === undefined)
         return false;
     if (!('steps' in value) || value['steps'] === undefined)
         return false;
     if (!('personas' in value) || value['personas'] === undefined)
         return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined)
+        return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined)
+        return false;
     if (!('relyingParty' in value) || value['relyingParty'] === undefined)
         return false;
     return true;
 }
-function PresentationScenarioRequestFromJSON(json) {
-    return PresentationScenarioRequestFromJSONTyped(json, false);
+function PresentationScenarioFromJSON(json) {
+    return PresentationScenarioFromJSONTyped(json, false);
 }
-function PresentationScenarioRequestFromJSONTyped(json, ignoreDiscriminator) {
+function PresentationScenarioFromJSONTyped(json, ignoreDiscriminator) {
     if (json == null) {
         return json;
     }
     return {
+        'id': json['id'],
         'name': json['name'],
+        'slug': json['slug'],
         'description': json['description'],
-        'steps': (json['steps'].map(StepRequest_1.StepRequestFromJSON)),
-        'personas': json['personas'],
+        'type': json['type'],
+        'steps': (json['steps'].map(Step_1.StepFromJSON)),
+        'personas': (json['personas'].map(Persona_1.PersonaFromJSON)),
         'hidden': json['hidden'] == null ? undefined : json['hidden'],
-        'relyingParty': json['relyingParty'],
+        'createdAt': (new Date(json['createdAt'])),
+        'updatedAt': (new Date(json['updatedAt'])),
+        'relyingParty': (0, RelyingParty_1.RelyingPartyFromJSON)(json['relyingParty']),
     };
 }
-function PresentationScenarioRequestToJSON(json) {
-    return PresentationScenarioRequestToJSONTyped(json, false);
+function PresentationScenarioToJSON(json) {
+    return PresentationScenarioToJSONTyped(json, false);
 }
-function PresentationScenarioRequestToJSONTyped(value, ignoreDiscriminator = false) {
+function PresentationScenarioToJSONTyped(value, ignoreDiscriminator = false) {
     if (value == null) {
         return value;
     }
     return {
+        'id': value['id'],
         'name': value['name'],
+        'slug': value['slug'],
         'description': value['description'],
-        'steps': (value['steps'].map(StepRequest_1.StepRequestToJSON)),
-        'personas': value['personas'],
+        'type': value['type'],
+        'steps': (value['steps'].map(Step_1.StepToJSON)),
+        'personas': (value['personas'].map(Persona_1.PersonaToJSON)),
         'hidden': value['hidden'],
-        'relyingParty': value['relyingParty'],
+        'createdAt': ((value['createdAt']).toISOString()),
+        'updatedAt': ((value['updatedAt']).toISOString()),
+        'relyingParty': (0, RelyingParty_1.RelyingPartyToJSON)(value['relyingParty']),
     };
 }
-//# sourceMappingURL=PresentationScenarioRequest.js.map
+//# sourceMappingURL=PresentationScenario.js.map
