@@ -12,11 +12,11 @@ import { useShowcaseStore } from '@/hooks/use-showcases-store'
 import { useRouter } from '@/i18n/routing'
 import { sampleAction } from '@/lib/steps'
 import type { IssuanceScenarioResponseType } from '@/openapi-types'
-import type { BasicStepFormData } from '@/schemas/onboarding'
+import type { WalletStepFormData } from '@/schemas/onboarding'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { debounce } from 'lodash'
 import { Edit, Monitor } from 'lucide-react'
-import { basicStepSchema } from '@/schemas/onboarding'
+import { walletStepSchema } from '@/schemas/onboarding'
 import { useTranslations } from 'next-intl'
 
 import { toast } from 'sonner'
@@ -52,8 +52,8 @@ export const WalletStepAdd = () => {
     asset: currentStep?.asset || undefined,
   }
 
-  const form = useForm<BasicStepFormData>({
-    resolver: zodResolver(basicStepSchema),
+  const form = useForm<WalletStepFormData>({
+    resolver: zodResolver(walletStepSchema),
     defaultValues,
     mode: 'all',
   })
@@ -68,7 +68,7 @@ export const WalletStepAdd = () => {
     }
   }, [currentStep, form])
 
-  const autoSave = debounce((data: BasicStepFormData) => {
+  const autoSave = debounce((data: WalletStepFormData) => {
     if (!currentStep || !form.formState.isDirty) return
 
     const updatedStep = {
@@ -88,14 +88,15 @@ export const WalletStepAdd = () => {
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (form.formState.isDirty) {
-        autoSave(value as BasicStepFormData)
+        autoSave(value as WalletStepFormData)
       }
     })
 
     return () => subscription.unsubscribe()
   }, [form, autoSave])
 
-  const onSubmit = async (data: BasicStepFormData) => {
+  const onSubmit = async (data: WalletStepFormData) => {
+    console.log(form.formState.errors);
     autoSave.flush()
     const personaScenarios = personas.map((persona) => {
       const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))
@@ -108,7 +109,7 @@ export const WalletStepAdd = () => {
           title: screen.title,
           description: screen.description,
           asset: screen.asset || undefined,
-          type: screen.type || 'HUMAN_TASK',
+          type: screen.type || 'CHOOSE_WALLET',
           order: index,
           actions: screen.actions || [sampleAction],
         })),
@@ -123,7 +124,7 @@ export const WalletStepAdd = () => {
           title: data.title,
           description: data.description,
           asset: data.asset || undefined,
-          type: 'HUMAN_TASK',
+          type: 'CHOOSE_WALLET',
           order: currentStep?.order || scenarioForPersona.steps.length,
           actions: [sampleAction],
         })
@@ -168,7 +169,7 @@ export const WalletStepAdd = () => {
             <p className="text-foreground text-sm">{t('onboarding.section_title')}</p>
             <h3 className="text-2xl font-bold text-foreground">{t('onboarding.details_step_header_title')}</h3>
           </div>
-          <Button variant="outline" onClick={() => setStepState('editing-basic')} className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setStepState('editing-wallet')} className="flex items-center gap-2">
             <Edit className="h-4 w-4" />
             {t('action.edit_label')}
           </Button>
@@ -219,6 +220,7 @@ export const WalletStepAdd = () => {
           <FormTextInput
             label={t('onboarding.page_title_label')}
             name="title"
+            control={form.control}
             register={form.register}
             error={form.formState.errors.title?.message}
             placeholder={t('onboarding.page_title_placeholder')}
@@ -229,6 +231,7 @@ export const WalletStepAdd = () => {
               label={t('onboarding.page_description_label')}
               name="description"
               register={form.register}
+              control={form.control}
               error={form.formState.errors.description?.message}
               placeholder={t('onboarding.page_description_placeholder')}
             />

@@ -12,8 +12,8 @@ import { useShowcaseStore } from '@/hooks/use-showcases-store'
 import { useRouter } from '@/i18n/routing'
 import { sampleAction } from '@/lib/steps'
 import type { IssuanceScenarioResponseType } from '@/openapi-types'
-import type { BasicStepFormData } from '@/schemas/onboarding'
-import { zodResolver } from "@hookform/resolvers/zod";
+import { ConnectStepFormData, connectStepSchema } from '@/schemas/onboarding'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { debounce } from 'lodash'
 import { Edit, Monitor } from 'lucide-react'
 import { basicStepSchema } from '@/schemas/onboarding'
@@ -24,7 +24,6 @@ import { ErrorModal } from '../error-modal'
 import StepHeader from '../step-header'
 import { LocalFileUpload } from "./local-file-upload";
 import ButtonOutline from '../ui/button-outline'
-
 
 import Loader from '../loader'
 
@@ -53,8 +52,8 @@ export const ConnectStepAdd = () => {
     asset: currentStep?.asset || undefined,
   }
 
-  const form = useForm<BasicStepFormData>({
-    resolver: zodResolver(basicStepSchema),
+  const form = useForm<ConnectStepFormData>({
+    resolver: zodResolver(connectStepSchema),
     defaultValues,
     mode: 'all',
   })
@@ -69,7 +68,7 @@ export const ConnectStepAdd = () => {
     }
   }, [currentStep, form])
 
-  const autoSave = debounce((data: BasicStepFormData) => {
+  const autoSave = debounce((data: ConnectStepFormData) => {
     if (!currentStep || !form.formState.isDirty) return
 
     const updatedStep = {
@@ -89,14 +88,15 @@ export const ConnectStepAdd = () => {
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (form.formState.isDirty) {
-        autoSave(value as BasicStepFormData)
+        autoSave(value as ConnectStepFormData)
       }
     })
 
     return () => subscription.unsubscribe()
   }, [form, autoSave])
 
-  const onSubmit = async (data: BasicStepFormData) => {
+  const onSubmit = async (data: ConnectStepFormData) => {
+    console.log(form.formState.errors);
     autoSave.flush()
     const personaScenarios = personas.map((persona) => {
       const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))
@@ -169,7 +169,7 @@ export const ConnectStepAdd = () => {
             <p className="text-foreground text-sm">{t('onboarding.section_title')}</p>
             <h3 className="text-2xl font-bold text-foreground">{t('onboarding.details_step_header_title')}</h3>
           </div>
-          <Button variant="outline" onClick={() => setStepState('editing-basic')} className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setStepState('editing-connect')} className="flex items-center gap-2">
             <Edit className="h-4 w-4" />
             {t('action.edit_label')}
           </Button>
@@ -220,6 +220,7 @@ export const ConnectStepAdd = () => {
           <FormTextInput
             label={t('onboarding.page_title_label')}
             name="title"
+            control={form.control}
             register={form.register}
             error={form.formState.errors.title?.message}
             placeholder={t('onboarding.page_title_placeholder')}
@@ -229,6 +230,7 @@ export const ConnectStepAdd = () => {
             <FormTextArea
               label={t('onboarding.page_description_label')}
               name="description"
+              control={form.control}
               register={form.register}
               error={form.formState.errors.description?.message}
               placeholder={t('onboarding.page_description_placeholder')}

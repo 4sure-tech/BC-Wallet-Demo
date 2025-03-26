@@ -40,19 +40,39 @@ export const SortableStep = ({
     transition,
   };
 
+  // const handleStepClick = () => {
+  //   setSelectedStep(stepIndex - 1);
+  //   const ScreenType = myScreen.type;
+  
+  //   switch (ScreenType) {
+  //     case 'SERVICE':
+  //       setStepState('editing-issue');
+  //       break;
+  //     case 'wallet':
+  //       setStepState('editing-wallet');
+  //       break;
+  //     case 'connect':
+  //       setStepState('editing-connect');
+  //       break;
+  //     default:
+  //       setStepState('editing-basic');
+  //   }
+  // };
   const handleStepClick = () => {
     setSelectedStep(stepIndex - 1);
+    
     const ScreenType = myScreen.type;
+    const actionType = myScreen.actions?.length ? myScreen.actions[0].actionType : null;
   
-    switch (ScreenType) {
-      case 'SERVICE':
+    switch (actionType) {
+      case 'SETUP_CONNECTION':
+        setStepState('editing-connect');
+        break;
+      case 'ACCEPT_CREDENTIAL':
         setStepState('editing-issue');
         break;
-      case 'wallet':
+      case 'CHOOSE_WALLET':
         setStepState('editing-wallet');
-        break;
-      case 'connect':
-        setStepState('editing-connect');
         break;
       default:
         setStepState('editing-basic');

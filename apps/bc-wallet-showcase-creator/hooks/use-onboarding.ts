@@ -86,7 +86,7 @@ export const useOnboarding = create<State & Actions>()(
         state.stepState = newState;
       }),
 
-    initializeScreens: (screens) =>
+      initializeScreens: (screens) =>
       set(
         produce((state) => {
           state.screens = deepClone(screens);
@@ -139,9 +139,9 @@ export const useOnboarding = create<State & Actions>()(
           state.screens = newScreens;
           state.selectedStep = newScreens.length - 1;
        
-          if (step.actions?.includes("connect")) {
+          if (step.actions?.includes("SETUP_CONNECTION")) {
             state.stepState = "editing-connect";
-          } else if (step.actions?.includes("wallet")) {
+          } else if (step.actions?.includes("CHOOSE_WALLET")) {
             state.stepState = "editing-wallet";
           } else if (step.credentials) {
             state.stepState = "editing-issue";
@@ -172,14 +172,14 @@ export const useOnboarding = create<State & Actions>()(
         })
       ),
 
-    reset: () =>
-      set(
-        produce((state) => {
-          state.selectedStep = null;
-          state.stepState = "no-selection";
-          state.screens = [];
-        })
-      ),
+      reset: () =>
+        set(
+          produce((state) => {
+              state.selectedStep = null;
+              state.stepState = "no-selection";
+              state.screens = [];
+          })
+        ),
   }))
 );
 
@@ -321,7 +321,7 @@ export const useCreateIssuanceStep = () => {
       return response;
     },
     onSettled: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["issuanceStep"] });
+        queryClient.invalidateQueries({ queryKey: ["issuanceStep"] });
     },
   });
 };

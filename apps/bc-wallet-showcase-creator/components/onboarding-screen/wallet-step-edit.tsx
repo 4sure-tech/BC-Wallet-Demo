@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { FormTextArea, FormTextInput } from '@/components/text-input'
@@ -24,10 +24,12 @@ import Loader from '../loader'
 import StepHeader from '../step-header'
 import ButtonOutline from '../ui/button-outline'
 import { LocalFileUpload } from './local-file-upload'
+import { sampleAction, sampleScenario } from '@/lib/steps'
+import { debounce } from 'lodash'
 
 export const WalletStepEdit = () => {
   const t = useTranslations()
-  const { screens, selectedStep, setSelectedStep, setStepState, stepState, removeStep } = useOnboarding()
+  const { screens, selectedStep, setSelectedStep, setStepState, stepState, updateStep, removeStep } = useOnboarding()
 
   const { mutateAsync: deleteStep } = useDeleteStep()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -55,13 +57,13 @@ export const WalletStepEdit = () => {
         setupTitle2: '2. Complete the setup',
         setupDescription2: 'Complete the onboarding process in the app.',
         apple: 'https://apps.apple.com/ca/app/bc-wallet/id6444150782',
-      android: 'https://play.google.com/store/apps/details?id=ca.bc.gov.BCWallet',
-      ledgerImage:
-      'https://play-lh.googleusercontent.com/eEYm6AaDGNFcE1riIW7W-R8RJvDgVVakjr2gnxdeUOngsb9EZWZ9p2zPDBHybiS0lUJu=w240-h480-rw',
+        android: 'https://play.google.com/store/apps/details?id=ca.bc.gov.BCWallet',
+        ledgerImage:
+          'https://play-lh.googleusercontent.com/eEYm6AaDGNFcE1riIW7W-R8RJvDgVVakjr2gnxdeUOngsb9EZWZ9p2zPDBHybiS0lUJu=w240-h480-rw',
       }
     : {
-        title: '',
-        description: '',
+        title: 'Install BC Wallet',
+        description: 'First, install the BC Wallet app onto your smartphone. Select the button below for instructions and the next step.',
         asset: '',
         setupTitle1: '1. Download BC Wallet on your phone',
         setupDescription1:
@@ -140,8 +142,90 @@ export const WalletStepEdit = () => {
     }
   }, [currentStep, form])
 
-  const onSubmit = (data: any) => {
-    handleCreateScenario()
+  const autoSave = debounce((data: WalletStepFormData) => {
+    if (!currentStep || !form.formState.isDirty) return
+
+    const updatedStep = {
+      ...currentStep,
+      title: data.title,
+      description: data.description,
+      asset: data.asset || undefined,
+    }
+
+    updateStep(selectedStep || 0, updatedStep)
+
+    setTimeout(() => {
+      toast.success('Changes saved', { duration: 1000 })
+    }, 500)
+  }, 800)
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      console.log("Watched form values:", value);
+      console.log("Current isValid:", form.formState.isValid);
+      console.log("Current isDirty:", form.formState.isDirty);
+  
+      if (form.formState.isDirty) {
+        autoSave(value as WalletStepFormData);
+      }
+    });
+  
+    return () => subscription.unsubscribe();
+  }, [form, autoSave]);
+
+  const onSubmit = async (data: any) => {
+    autoSave.flush()
+    // handleCreateScenario()
+    const personaScenarios = personas.map((persona) => {
+      const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))
+
+      scenarioForPersona.personas = [persona]
+      scenarioForPersona.issuer = issuerId
+
+      scenarioForPersona.steps = [
+        ...screens.map((screen, index) => ({
+          title: screen.title,
+          description: screen.description,
+          asset: screen.asset || undefined,
+          type: screen.type || 'HUMAN_TASK',
+          order: index,
+          actions: screen.actions || [sampleAction],
+        })),
+      ]
+
+      const currentStepExists = scenarioForPersona.steps.some(
+        (step: any) => step.title === data.title && step.description === data.description,
+      )
+
+      if (!currentStepExists) {
+        scenarioForPersona.steps.push({
+          title: data.title,
+          description: data.description,
+          asset: data.asset || undefined,
+          type: 'HUMAN_TASK',
+          order: currentStep?.order || scenarioForPersona.steps.length,
+          actions: [sampleAction],
+        })
+      }
+
+      return scenarioForPersona
+    })
+    const scenarioIds = []
+
+    for (const scenario of personaScenarios) {
+      try {
+        const result = await mutateAsync(scenario)
+        scenarioIds.push((result as IssuanceScenarioResponseType).issuanceScenario.id)
+        toast.success(`Scenario created for ${scenario.personas[0]?.name || 'persona'}`)
+      } catch (error) {
+        console.error('Error creating scenario:', error)
+        setErrorModal(true)
+        return // Stop if there's an error
+      }
+    }
+
+    setScenarioIds(scenarioIds)
+    router.push(`/showcases/create/scenarios`)
   }
 
   const handleDeleteStep = async (stepId: any) => {
@@ -181,7 +265,7 @@ export const WalletStepEdit = () => {
             <p className="text-foreground text-sm">{t('onboarding.section_title')}</p>
             <h3 className="text-2xl font-bold text-foreground">{t('onboarding.details_step_header_title')}</h3>
           </div>
-          <Button variant="outline" onClick={() => setStepState('editing-basic')} className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setStepState('editing-wallet')} className="flex items-center gap-2">
             <Edit className="h-4 w-4" />
             {t('action.edit_label')}
           </Button>
@@ -249,6 +333,7 @@ export const WalletStepEdit = () => {
                 <FormTextInput
                   label={t('onboarding.page_title_label')}
                   name="title"
+                  control={form.control}
                   register={form.register}
                   error={form.formState.errors.title?.message}
                   placeholder={t('onboarding.page_title_placeholder')}
@@ -259,6 +344,7 @@ export const WalletStepEdit = () => {
                     label={t('onboarding.page_description_label')}
                     name="description"
                     register={form.register}
+                    control={form.control}
                     error={form.formState.errors.description?.message}
                     placeholder={t('onboarding.page_description_placeholder')}
                   />
@@ -294,6 +380,7 @@ export const WalletStepEdit = () => {
                     name="apple"
                     register={form.register}
                     readOnly={true}
+                    control={form.control}
                     disabled={true}
                     placeholder="Enter the App Store URL"
                   />
@@ -302,6 +389,7 @@ export const WalletStepEdit = () => {
                     name="android"
                     readOnly={true}
                     disabled={true}
+                    control={form.control}
                     register={form.register}
                     placeholder="Enter the Google Play Store URL"
                   />
@@ -315,6 +403,7 @@ export const WalletStepEdit = () => {
                   name="setupTitle1"
                   register={form.register}
                   readOnly={true}
+                  control={form.control}
                   disabled={true}
                   placeholder="Enter the title for this step"
                 />
@@ -323,6 +412,7 @@ export const WalletStepEdit = () => {
                   name="setupDescription1"
                   register={form.register}
                   readOnly={true}
+                  control={form.control}
                   disabled={true}
                   placeholder="Enter the description for this step"
                 />
@@ -333,6 +423,7 @@ export const WalletStepEdit = () => {
                   name="setupTitle2"
                   register={form.register}
                   readOnly={true}
+                  control={form.control}
                   disabled={true}
                   placeholder="Enter the title for this step"
                 />
@@ -341,15 +432,15 @@ export const WalletStepEdit = () => {
                   name="setupDescription2"
                   register={form.register}
                   readOnly={true}
+                  control={form.control}
                   disabled={true}
                   placeholder="Enter the description for this step"
-                  />
+                />
               </div>
               <div className="mt-auto pt-4 border-t flex justify-end gap-3">
                 <ButtonOutline onClick={handleCancel} type="button">
                   {t('action.cancel_label')}
                 </ButtonOutline>
-                <ButtonOutline type="submit">{'Save Changes'}</ButtonOutline>
 
                 <ButtonOutline type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
                   {t('action.next_label')}

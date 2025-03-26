@@ -98,6 +98,7 @@ export const BasicStepAdd = () => {
   }, [form, autoSave])
 
   const onSubmit = async (data: BasicStepFormData) => {
+    console.log(form.formState.errors);
     autoSave.flush()
     const personaScenarios = personas.map((persona) => {
       const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))

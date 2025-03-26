@@ -154,6 +154,7 @@
     "create_basic_step_label": "Basique",
     "create_issue_step_label": "Émission d'Identifiant",
     "create_add_step_label": "Ajouter une Étape",
+    "delete_onboarding_label": "Supprimer Etape",
     "create_title_label": "Titre",
     "create_description_label": "Description",
     "create_image_label": "Image",

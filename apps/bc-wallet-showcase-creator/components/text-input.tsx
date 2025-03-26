@@ -27,6 +27,8 @@ export const FormTextInput = <T extends FieldValues>({
   error,
   placeholder,
   className,
+  readOnly,
+  disabled,
   control,
 }: FormInputProps<T>) => {
   return (
@@ -40,12 +42,18 @@ export const FormTextInput = <T extends FieldValues>({
               {label}
             </Label>
             <Input
-              className="mt-3 border dark:border-dark-border text-foreground"
+              className={cn(
+                'mt-3 border dark:border-dark-border border-gray-300 text-foreground',
+                readOnly && 'bg-gray-50 text-foreground  cursor-not-allowed',
+                disabled && 'bg-foreground/10 text-foreground cursor-not-allowed' 
+              )}
               id={name}
               type="text"
               placeholder={placeholder}
               {...register(name)}
               {...field}
+              readOnly={readOnly}
+              disabled={disabled}
             />
             {error && <FormMessage className="text-red-500 text-sm">{error}</FormMessage>}
           </div>
@@ -71,7 +79,11 @@ export const FormTextArea = <T extends FieldValues>({
         {label}
       </Label>
       <Textarea
-        className="rounded w-full dark:text-dark-text dark:bg-dark-input bg-light-bg resize-none mt-3 p-2 border dark:border-dark-border"
+            className={cn(
+              'mt-3 border dark:border-dark-border border-gray-300 text-foreground',
+              readOnly && 'bg-gray-50 text-foreground  cursor-not-allowed',
+              disabled && 'bg-foreground/10 text-foreground cursor-not-allowed' 
+            )}
         rows={3}
         id={name}
         placeholder={placeholder}

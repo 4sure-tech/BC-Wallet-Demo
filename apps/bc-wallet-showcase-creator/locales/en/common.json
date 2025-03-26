@@ -153,6 +153,7 @@
     "add_step_label": "ADD STEP",
     "no_step_selected_message": "No Step Selected",
     "step_basic_step_label": "Basic Step",
+   "delete_onboarding_label": "Delete Step",
     "step_issue_step_label": "Issue Step",
     "section_title": "Onboarding",
     "create_header_title": "Create a New Step",

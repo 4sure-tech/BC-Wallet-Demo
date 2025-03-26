@@ -11,54 +11,56 @@ export const CreateNewStep = () => {
   const { createStep, setStepState, activePersona, setActivePersonaId } = useOnboardingAdapter()
   const t = useTranslations()
 
-  const handleAddStep = (stepType: string) => {
-    const personaName = activePersona?.name || 'Character'
+  const handleAddStep = (actionType: string) => {
+    const personaName = activePersona?.name || 'Character';
 
-    switch (stepType) {
-      case 'issue':
+    // Switch case to handle different action types
+    switch (actionType) {
+      case 'SETUP_CONNECTION':
+        createStep(
+          createDefaultStep({
+            title: `Connect with BC College`,
+            description: `Imagine, as ${personaName}, you are logged into the BestBC College website. They want to offer you a Digital Student Card. Use your BC Wallet to scan the QR code from the website.`,
+          })
+        );
+        setStepState('editing-connect');
+        break;
+
+      case 'ACCEPT_CREDENTIAL':
         createStep(
           createServiceStep({
             title: `Accept your student card`,
             description: `You should have received an offer in BC Wallet for a Student Card. Review what they are sending, and choose 'Accept offer'.`,
           })
-        )
-        setStepState('editing-issue')
-        break
+        );
+        setStepState('editing-issue');
+        break;
 
-      case 'basic':
-        createStep(
-          createDefaultStep({
-            title: 'Basic Step',
-            description: 'This is a basic step in the onboarding journey.',
-          })
-        )
-        setStepState('editing-basic')
-        break
-
-      case 'wallet':
+      case 'CHOOSE_WALLET':
         createStep(
           createDefaultStep({
             title: 'Install BC Wallet',
             description: "First, install the BC Wallet app onto your smartphone. Select the button below for instructions and the next step.",
           })
-        )
-        setStepState('editing-wallet')
-        break
+        );
+        setStepState('editing-wallet');
+        break;
 
-      case 'connect':
+      case 'BASIC':
         createStep(
           createDefaultStep({
-            title: 'Connect with BC College',
-            description:`Imagine, as ${personaName}, you are logged into the BestBC College website (see below). They want to offer you a Digital Student Card. Use your BC Wallet to scan the QR code from the website.` ,
+            title: 'Basic Step',
+            description: 'This is a basic step in the onboarding journey.',
           })
-        )
-        setStepState('editing-connect')
-        break
+        );
+        setStepState('editing-basic');
+        break;
 
       default:
-        break
+        console.warn('Unknown action type:', actionType);
+        break;
     }
-  }
+  };
 
   return (
     <>
@@ -75,7 +77,7 @@ export const CreateNewStep = () => {
           t('onboarding.create_description_label') || 'Description',
           t('onboarding.create_image_label') || 'Image',
         ]}
-        onClick={() => handleAddStep('basic')}
+        onClick={() => handleAddStep('BASIC')}  
       />
 
       <StepButton
@@ -86,7 +88,7 @@ export const CreateNewStep = () => {
           t('onboarding.create_image_label') || 'Image',
           t('onboarding.create_credentials_label') || 'Credential(s)',
         ]}
-        onClick={() => handleAddStep('issue')}
+        onClick={() => handleAddStep('ACCEPT_CREDENTIAL')}  
       />
 
       <StepButton
@@ -97,7 +99,7 @@ export const CreateNewStep = () => {
           t('onboarding.create_image_label') || 'Image',
           t('onboarding.install_wallet_label') || 'Wallet',
         ]}
-        onClick={() => handleAddStep('wallet')}
+        onClick={() => handleAddStep('CHOOSE_WALLET')} 
       />
 
       <StepButton
@@ -108,7 +110,7 @@ export const CreateNewStep = () => {
           t('onboarding.create_image_label') || 'Image',
           'QR Code',
         ]}
-        onClick={() => handleAddStep('connect')}
+        onClick={() => handleAddStep('SETUP_CONNECTION')} 
       />
     </>
   )

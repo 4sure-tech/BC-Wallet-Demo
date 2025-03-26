@@ -1,43 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { FormTextArea, FormTextInput } from "@/components/text-input";
-import { Edit, Monitor } from "lucide-react";
-import { useOnboarding, useCreateScenario } from "@/hooks/use-onboarding";
-import { BasicStepFormData } from "@/schemas/onboarding";
-import { basicStepSchema } from "@/schemas/onboarding";
-import { LocalFileUpload } from "./local-file-upload";
-import { useTranslations } from "next-intl";
-import StepHeader from "../step-header";
-import ButtonOutline from "../ui/button-outline";
-import DeleteModal
-   from "../delete-modal";
-import { useRouter } from "@/i18n/routing";
-import { ErrorModal } from "../error-modal";
-import Loader from "../loader";
-import {
-  ScenarioRequestType,
-  IssuanceScenarioResponseType,
-} from "@/openapi-types";
-import { useShowcaseStore } from "@/hooks/use-showcases-store";
-import { toast } from "sonner";
-import { useDeleteStep } from "@/hooks/use-issue-step";
-import { useHelpersStore } from "@/hooks/use-helpers-store";
+import React, { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Button } from '@/components/ui/button'
+import { Form } from '@/components/ui/form'
+import { FormTextArea, FormTextInput } from '@/components/text-input'
+import { Edit, Monitor } from 'lucide-react'
+import { useOnboarding, useCreateScenario } from '@/hooks/use-onboarding'
+import { BasicStepFormData } from '@/schemas/onboarding'
+import { basicStepSchema } from '@/schemas/onboarding'
+import { LocalFileUpload } from './local-file-upload'
+import { useTranslations } from 'next-intl'
+import StepHeader from '../step-header'
+import ButtonOutline from '../ui/button-outline'
+import DeleteModal from '../delete-modal'
+import { useRouter } from '@/i18n/routing'
+import { ErrorModal } from '../error-modal'
+import Loader from '../loader'
+import { ScenarioRequestType, IssuanceScenarioResponseType } from '@/openapi-types'
+import { useShowcaseStore } from '@/hooks/use-showcases-store'
+import { toast } from 'sonner'
+import { useDeleteStep } from '@/hooks/use-issue-step'
+import { useHelpersStore } from '@/hooks/use-helpers-store'
+import { debounce } from 'lodash'
+import { sampleAction, sampleScenario } from '@/lib/steps'
 
 export const BasicStepEdit = () => {
-  const t = useTranslations();
-  const {
-    screens,
-    selectedStep,
-    setSelectedStep,
-    setStepState,
-    stepState,
-    removeStep,
-  } = useOnboarding();
+  const t = useTranslations()
+  const { screens, selectedStep, setSelectedStep, setStepState, updateStep, stepState, removeStep } = useOnboarding()
 
   const { mutateAsync: deleteStep } = useDeleteStep();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,7 +36,7 @@ export const BasicStepEdit = () => {
   const currentStep: any = selectedStep !== null ? screens[selectedStep] : null;
   const { showcase, setScenarioIds } = useShowcaseStore();
   const { issuerId } = useHelpersStore();
-  
+
   const personas = showcase.personas || [];
   const router = useRouter();
 
@@ -80,11 +71,95 @@ export const BasicStepEdit = () => {
         asset: currentStep.asset || "",
       });
     }
-  }, [currentStep, form]);
+  }, [currentStep, form])
+  const autoSave = debounce((data: BasicStepFormData) => {
+    if (!currentStep || !form.formState.isDirty) return
 
-  const onSubmit = (data: any) => {
-    handleCreateScenario();
-  };
+    const updatedStep = {
+      ...currentStep,
+      title: data.title,
+      description: data.description,
+      asset: data.asset || undefined,
+    }
+
+    updateStep(selectedStep || 0, updatedStep)
+
+    setTimeout(() => {
+      toast.success('Changes saved', { duration: 1000 })
+    }, 500)
+  }, 800)
+
+  console.log(form.formState.errors)
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      console.log('Form Watch:', value) // Watch form data in real-time
+      if (form.formState.isDirty) {
+        autoSave(value as BasicStepFormData)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [form, autoSave])
+
+  const onSubmit = async (data: any) => {
+    console.log('Validation Errors:', form.formState.errors) // Log errors to check if the form is invalid
+
+    autoSave.flush()
+
+    // handleCreateScenario()
+    const personaScenarios = personas.map((persona) => {
+      const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))
+
+      scenarioForPersona.personas = [persona]
+      scenarioForPersona.issuer = issuerId
+
+      scenarioForPersona.steps = [
+        ...screens.map((screen, index) => ({
+          title: screen.title,
+          description: screen.description,
+          asset: screen.asset || undefined,
+          type: screen.type || 'SETUP_CONNECTION',
+          order: index,
+          actions: screen.actions || [sampleAction],
+        })),
+      ]
+
+      const currentStepExists = scenarioForPersona.steps.some(
+        (step: any) => step.title === data.title && step.description === data.description,
+      )
+
+      if (!currentStepExists) {
+        console.log('Not exist')
+        scenarioForPersona.steps.push({
+          title: data.title,
+          description: data.description,
+          asset: data.asset || undefined,
+          type: 'HUMAN_TASK',
+          order: currentStep?.order || scenarioForPersona.steps.length,
+          actions: [sampleAction],
+        })
+      }
+      return scenarioForPersona
+    })
+
+    const scenarioIds = []
+
+    for (const scenario of personaScenarios) {
+      try {
+        const result = await mutateAsync(scenario)
+        scenarioIds.push((result as IssuanceScenarioResponseType).issuanceScenario.id)
+        toast.success(`Scenario created for ${scenario.personas[0]?.name || 'persona'}`)
+      } catch (error) {
+        console.error('Error creating scenario:', error)
+        setErrorModal(true)
+        return
+      }
+    }
+
+    setScenarioIds(scenarioIds)
+    router.push(`/showcases/create/scenarios`)
+  }
 
   const handleDeleteStep = async (stepId: any) => {
     try {
@@ -148,14 +223,12 @@ export const BasicStepEdit = () => {
 
     await mutateAsync(data, {
       onSuccess: (data: unknown) => {
-        toast.success("Scenario Created");
-        setScenarioIds([
-          (data as IssuanceScenarioResponseType).issuanceScenario.id,
-        ]);
-        router.push(`/showcases/create/scenarios`);
+        toast.success('Scenario Created')
+        setScenarioIds([(data as IssuanceScenarioResponseType).issuanceScenario.id])
+        router.push(`/showcases/create/scenarios`)
       },
-    });
-  };
+    })
+  }
 
   const handleCancel = () => {
     form.reset();
@@ -223,17 +296,12 @@ export const BasicStepEdit = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <>
-      {showErrorModal && (
-        <ErrorModal
-          errorText="Unknown error occurred"
-          setShowModal={setErrorModal}
-        />
-      )}
+      {showErrorModal && <ErrorModal errorText="Unknown error occurred" setShowModal={setErrorModal} />}
       {loading ? (
         <Loader text="Creating Step" />
       ) : (
@@ -313,7 +381,6 @@ export const BasicStepEdit = () => {
                 <ButtonOutline onClick={handleCancel} type="button">
                   {t("action.cancel_label")}
                 </ButtonOutline>
-                <ButtonOutline type="submit">{"Save Changes"}</ButtonOutline>
 
                 <ButtonOutline
                   type="submit"

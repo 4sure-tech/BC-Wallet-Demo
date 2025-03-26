@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { FormTextArea, FormTextInput } from '@/components/text-input'
@@ -12,23 +12,24 @@ import { useOnboarding, useCreateScenario } from '@/hooks/use-onboarding'
 import { useShowcaseStore } from '@/hooks/use-showcases-store'
 import { useRouter } from '@/i18n/routing'
 import type { ScenarioRequestType, IssuanceScenarioResponseType } from '@/openapi-types'
-import type { BasicStepFormData } from '@/schemas/onboarding'
+import { ConnectStepFormData, connectStepSchema } from '@/schemas/onboarding'
 import { basicStepSchema } from '@/schemas/onboarding'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit, Monitor } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-
 import DeleteModal from '../delete-modal'
 import { ErrorModal } from '../error-modal'
 import Loader from '../loader'
 import StepHeader from '../step-header'
 import ButtonOutline from '../ui/button-outline'
 import { LocalFileUpload } from './local-file-upload'
+import { sampleAction, sampleScenario } from '@/lib/steps'
+import { debounce } from 'lodash'
 
 export const ConnectStepEdit = () => {
   const t = useTranslations()
-  const { screens, selectedStep, setSelectedStep, setStepState, stepState, removeStep } = useOnboarding()
+  const { screens, selectedStep, setSelectedStep, setStepState, stepState, updateStep, removeStep } = useOnboarding()
 
   const { mutateAsync: deleteStep } = useDeleteStep()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -59,8 +60,8 @@ export const ConnectStepEdit = () => {
         qrCodeTitle: 'Scan the QR Code below with your digital wallet.',
       }
 
-  const form = useForm<BasicStepFormData>({
-    resolver: zodResolver(basicStepSchema),
+  const form = useForm<ConnectStepFormData>({
+    resolver: zodResolver(connectStepSchema),
     defaultValues,
     mode: 'all',
   })
@@ -121,12 +122,94 @@ export const ConnectStepEdit = () => {
         title: currentStep.title,
         description: currentStep.description,
         asset: currentStep.asset || '',
+        qrCodeTitle: 'Scan the QR Code below with your digital wallet.',
       })
     }
   }, [currentStep, form])
+  const autoSave = debounce((data: ConnectStepFormData) => {
+    if (!currentStep || !form.formState.isDirty) return
 
-  const onSubmit = (data: any) => {
-    handleCreateScenario()
+    const updatedStep = {
+      ...currentStep,
+      title: data.title,
+      description: data.description,
+      asset: data.asset || undefined,
+    }
+
+    updateStep(selectedStep || 0, updatedStep)
+
+    setTimeout(() => {
+      toast.success('Changes saved', { duration: 1000 })
+    }, 500)
+  }, 800)
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (form.formState.isDirty) {
+        autoSave(value as ConnectStepFormData)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [form, autoSave])
+
+  const onSubmit = async (data: any) => {
+    console.log('Validation Errors:', form.formState.errors); // Log errors to check if the form is invalid
+
+    autoSave.flush()
+
+    // handleCreateScenario()
+    const personaScenarios = personas.map((persona) => {
+      const scenarioForPersona = JSON.parse(JSON.stringify(sampleScenario))
+
+      scenarioForPersona.personas = [persona]
+      scenarioForPersona.issuer = issuerId
+
+      scenarioForPersona.steps = [
+        ...screens.map((screen, index) => ({
+          title: screen.title,
+          description: screen.description,
+          asset: screen.asset || undefined,
+          type: screen.type || 'SETUP_CONNECTION',
+          order: index,
+          actions: screen.actions || [sampleAction],
+        })),
+      ]
+
+      const currentStepExists = scenarioForPersona.steps.some(
+        (step: any) => step.title === data.title && step.description === data.description,
+      )
+
+      if (!currentStepExists) {
+        console.log('Not exist')
+        scenarioForPersona.steps.push({
+          title: data.title,
+          description: data.description,
+          asset: data.asset || undefined,
+          type: 'HUMAN_TASK',
+          order: currentStep?.order || scenarioForPersona.steps.length,
+          actions: [sampleAction],
+        })
+      }
+      return scenarioForPersona
+    })
+
+    const scenarioIds = []
+
+    for (const scenario of personaScenarios) {
+      try {
+        const result = await mutateAsync(scenario)
+        scenarioIds.push((result as IssuanceScenarioResponseType).issuanceScenario.id)
+        toast.success(`Scenario created for ${scenario.personas[0]?.name || 'persona'}`)
+      } catch (error) {
+        console.error('Error creating scenario:', error)
+        setErrorModal(true)
+        return 
+      }
+    }
+
+    setScenarioIds(scenarioIds)
+    router.push(`/showcases/create/scenarios`)
   }
 
   const handleDeleteStep = async (stepId: any) => {
@@ -166,7 +249,7 @@ export const ConnectStepEdit = () => {
             <p className="text-foreground text-sm">{t('onboarding.section_title')}</p>
             <h3 className="text-2xl font-bold text-foreground">{t('onboarding.details_step_header_title')}</h3>
           </div>
-          <Button variant="outline" onClick={() => setStepState('editing-basic')} className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setStepState('editing-connect')} className="flex items-center gap-2">
             <Edit className="h-4 w-4" />
             {t('action.edit_label')}
           </Button>
@@ -234,6 +317,7 @@ export const ConnectStepEdit = () => {
                 <FormTextInput
                   label={t('onboarding.page_title_label')}
                   name="title"
+                  control={form.control}
                   register={form.register}
                   error={form.formState.errors.title?.message}
                   placeholder={t('onboarding.page_title_placeholder')}
@@ -244,6 +328,7 @@ export const ConnectStepEdit = () => {
                     label={t('onboarding.page_description_label')}
                     name="description"
                     register={form.register}
+                    control={form.control}
                     error={form.formState.errors.description?.message}
                     placeholder={t('onboarding.page_description_placeholder')}
                   />
@@ -275,6 +360,7 @@ export const ConnectStepEdit = () => {
                   <FormTextInput
                     label={t('onboarding.qrCode_label')}
                     name="qrCodeTitle"
+                    control={form.control}
                     register={form.register}
                     readOnly={true}
                     disabled={true}
@@ -286,8 +372,6 @@ export const ConnectStepEdit = () => {
                 <ButtonOutline onClick={handleCancel} type="button">
                   {t('action.cancel_label')}
                 </ButtonOutline>
-                <ButtonOutline type="submit">{'Save Changes'}</ButtonOutline>
-
                 <ButtonOutline type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
                   {t('action.next_label')}
                 </ButtonOutline>
