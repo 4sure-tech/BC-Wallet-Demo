@@ -38,7 +38,6 @@ export const useShowcaseCreation = () => {
             actions: [
               {
                 ...sampleAction,
-                actionType: 'BASIC',
               },
             ],
           },
@@ -50,7 +49,6 @@ export const useShowcaseCreation = () => {
             actions: [
               {
                 ...sampleAction,
-                actionType: 'BASIC',
               },
             ],
           },
