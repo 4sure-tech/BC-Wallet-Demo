@@ -12,8 +12,8 @@ import { useOnboarding, useCreateScenario } from '@/hooks/use-onboarding'
 import { useShowcaseStore } from '@/hooks/use-showcases-store'
 import { useRouter } from '@/i18n/routing'
 import type { ScenarioRequestType, IssuanceScenarioResponseType } from '@/openapi-types'
-import { ConnectStepFormData, connectStepSchema } from '@/schemas/onboarding'
-import { basicStepSchema } from '@/schemas/onboarding'
+import type { ConnectStepFormData } from '@/schemas/onboarding'
+import { connectStepSchema } from '@/schemas/onboarding'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit, Monitor } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -315,9 +315,9 @@ export const ConnectStepEdit = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-6">
                 <FormTextInput
+                  control={form.control}
                   label={t('onboarding.page_title_label')}
                   name="title"
-                  control={form.control}
                   register={form.register}
                   error={form.formState.errors.title?.message}
                   placeholder={t('onboarding.page_title_placeholder')}
@@ -325,10 +325,10 @@ export const ConnectStepEdit = () => {
 
                 <div className="space-y-2">
                   <FormTextArea
+                    control={form.control}
                     label={t('onboarding.page_description_label')}
                     name="description"
                     register={form.register}
-                    control={form.control}
                     error={form.formState.errors.description?.message}
                     placeholder={t('onboarding.page_description_placeholder')}
                   />
@@ -358,9 +358,9 @@ export const ConnectStepEdit = () => {
                 </div>
                 <div className="space-y-2">
                   <FormTextInput
+                    control={form.control}
                     label={t('onboarding.qrCode_label')}
                     name="qrCodeTitle"
-                    control={form.control}
                     register={form.register}
                     readOnly={true}
                     disabled={true}

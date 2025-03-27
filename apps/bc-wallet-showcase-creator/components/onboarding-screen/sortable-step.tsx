@@ -87,7 +87,7 @@ export const SortableStep = ({
       const stepToCopy = screens[index];
 
       const newStep = JSON.parse(JSON.stringify(stepToCopy));
-      newStep.id = `${Date.now()}`; // Ensure a unique ID
+      newStep.id = `${Date.now()}`;
 
       useOnboarding.setState(
         produce((state) => {
@@ -202,7 +202,7 @@ export const SortableStep = ({
               </div>
               <div className="align-middle ml-auto">
                 <div className="font-semibold">Attributes</div>
-                <div className="text-sm text-end">{Object.keys(selectedCredential.credentialSchema.attributes).length}</div>
+                {/* <div className="text-sm text-end">{Object.keys(selectedCredential.credentialSchema.attributes).length}</div> */}
               </div>
             </div>
             }

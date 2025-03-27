@@ -331,6 +331,7 @@ export const WalletStepEdit = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-6">
                 <FormTextInput
+                  control={form.control}
                   label={t('onboarding.page_title_label')}
                   name="title"
                   control={form.control}
@@ -341,6 +342,7 @@ export const WalletStepEdit = () => {
 
                 <div className="space-y-2">
                   <FormTextArea
+                    control={form.control}
                     label={t('onboarding.page_description_label')}
                     name="description"
                     register={form.register}
@@ -376,6 +378,7 @@ export const WalletStepEdit = () => {
                 </div>
                 <div className="space-y-2">
                   <FormTextInput
+                    control={form.control}
                     label="App Store URL"
                     name="apple"
                     register={form.register}
@@ -385,6 +388,7 @@ export const WalletStepEdit = () => {
                     placeholder="Enter the App Store URL"
                   />
                   <FormTextInput
+                    control={form.control}
                     label="Google Play Store URL"
                     name="android"
                     readOnly={true}
@@ -399,6 +403,7 @@ export const WalletStepEdit = () => {
               {/* Step 2: Complete Setup */}
               <div className="space-y-2">
                 <FormTextInput
+                  control={form.control}
                   label="Step Title"
                   name="setupTitle1"
                   register={form.register}
@@ -408,6 +413,7 @@ export const WalletStepEdit = () => {
                   placeholder="Enter the title for this step"
                 />
                 <FormTextArea
+                  control={form.control}
                   label="Step Description"
                   name="setupDescription1"
                   register={form.register}
@@ -419,6 +425,7 @@ export const WalletStepEdit = () => {
               </div>
               <div className="space-y-2">
                 <FormTextInput
+                  control={form.control}
                   label="Step Title"
                   name="setupTitle2"
                   register={form.register}
@@ -428,6 +435,7 @@ export const WalletStepEdit = () => {
                   placeholder="Enter the title for this step"
                 />
                 <FormTextArea
+                  control={form.control}
                   label="Step Description"
                   name="setupDescription2"
                   register={form.register}
