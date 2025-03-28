@@ -221,7 +221,6 @@ export const WalletStepAdd = () => {
             control={form.control}
             label={t('onboarding.page_title_label')}
             name="title"
-            control={form.control}
             register={form.register}
             error={form.formState.errors.title?.message}
             placeholder={t('onboarding.page_title_placeholder')}
@@ -233,7 +232,6 @@ export const WalletStepAdd = () => {
               label={t('onboarding.page_description_label')}
               name="description"
               register={form.register}
-              control={form.control}
               error={form.formState.errors.description?.message}
               placeholder={t('onboarding.page_description_placeholder')}
             />

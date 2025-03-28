@@ -334,7 +334,6 @@ export const WalletStepEdit = () => {
                   control={form.control}
                   label={t('onboarding.page_title_label')}
                   name="title"
-                  control={form.control}
                   register={form.register}
                   error={form.formState.errors.title?.message}
                   placeholder={t('onboarding.page_title_placeholder')}
@@ -346,7 +345,6 @@ export const WalletStepEdit = () => {
                     label={t('onboarding.page_description_label')}
                     name="description"
                     register={form.register}
-                    control={form.control}
                     error={form.formState.errors.description?.message}
                     placeholder={t('onboarding.page_description_placeholder')}
                   />
@@ -383,7 +381,6 @@ export const WalletStepEdit = () => {
                     name="apple"
                     register={form.register}
                     readOnly={true}
-                    control={form.control}
                     disabled={true}
                     placeholder="Enter the App Store URL"
                   />
@@ -393,7 +390,6 @@ export const WalletStepEdit = () => {
                     name="android"
                     readOnly={true}
                     disabled={true}
-                    control={form.control}
                     register={form.register}
                     placeholder="Enter the Google Play Store URL"
                   />
@@ -408,7 +404,6 @@ export const WalletStepEdit = () => {
                   name="setupTitle1"
                   register={form.register}
                   readOnly={true}
-                  control={form.control}
                   disabled={true}
                   placeholder="Enter the title for this step"
                 />
@@ -418,7 +413,6 @@ export const WalletStepEdit = () => {
                   name="setupDescription1"
                   register={form.register}
                   readOnly={true}
-                  control={form.control}
                   disabled={true}
                   placeholder="Enter the description for this step"
                 />
@@ -430,7 +424,6 @@ export const WalletStepEdit = () => {
                   name="setupTitle2"
                   register={form.register}
                   readOnly={true}
-                  control={form.control}
                   disabled={true}
                   placeholder="Enter the title for this step"
                 />
@@ -440,7 +433,6 @@ export const WalletStepEdit = () => {
                   name="setupDescription2"
                   register={form.register}
                   readOnly={true}
-                  control={form.control}
                   disabled={true}
                   placeholder="Enter the description for this step"
                 />

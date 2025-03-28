@@ -221,7 +221,6 @@ export const ConnectStepAdd = () => {
             control={form.control}
             label={t('onboarding.page_title_label')}
             name="title"
-            control={form.control}
             register={form.register}
             error={form.formState.errors.title?.message}
             placeholder={t('onboarding.page_title_placeholder')}
@@ -232,7 +231,6 @@ export const ConnectStepAdd = () => {
               control={form.control}
               label={t('onboarding.page_description_label')}
               name="description"
-              control={form.control}
               register={form.register}
               error={form.formState.errors.description?.message}
               placeholder={t('onboarding.page_description_placeholder')}
