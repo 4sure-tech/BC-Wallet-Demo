@@ -2005,6 +2005,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StepAction'
+        credentialDefinition:
+          $ref: '#/components/schemas/CredentialDefinition'
         asset:
           $ref: '#/components/schemas/Asset'
         createdAt:
@@ -2054,6 +2056,10 @@ components:
         asset:
           type: string
           description: Asset referenced by this step
+          example: 456e4567-e89b-12d3-a456-426614174000
+        credentialDefinition:
+          type: string
+          description: Credential definition ID
           example: 456e4567-e89b-12d3-a456-426614174000
     StepsResponse:
       properties:

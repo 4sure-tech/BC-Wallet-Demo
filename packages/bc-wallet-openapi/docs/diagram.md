@@ -47,9 +47,9 @@ classDiagram
         +description : String
         +order : int
         +type : StepType
-        +credentialDefinition : CredentialDefinition
         +createdAt : DateTime
         +updatedAt : DateTime
+        credentialDefinition : CredentialDefinition
         subFlow: Scenario
         actions: List~StepAction~
         asset: Asset
