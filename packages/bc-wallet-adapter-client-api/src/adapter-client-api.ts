@@ -38,6 +38,12 @@ export class AdapterClientApi {
   }
 
   private async send(action: Action, payload: object, authHeader?: string): Promise<void> {
+    if (!this.isConnected) {
+      // FIXME remove ASAP
+      console.warn('No AMQ connection')
+      return
+    }
+
     try {
       await this.isInitComplete
 
