@@ -4,6 +4,8 @@
 
 BC Wallet services with PostgreSQL and RabbitMQ
 
+For more info on the devops setup there is [devops.md](../../resources/DEVOPS/devops.md) in the resources/DEVOPS folder in the root.
+
 ## Values
 
 | Key | Type | Default | Description |

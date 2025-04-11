@@ -2,6 +2,9 @@
 
 This repository contains Docker configurations for the Credential Showcase system, which consists of an API server and a Traction adapter that communicate via RabbitMQ message broker.
 
+
+For more info on the devops setup there is [devops.md](../../resources/DEVOPS/devops.md) in the resources/DEVOPS folder in the root.
+
 ## Components
 
 - **bc-wallet-api-server**: Main API service that connects to PostgreSQL
