@@ -186,6 +186,9 @@ jobs:
               --set traction_adapter.env.FIXED_WALLET_ID=${{secrets.FIXED_WALLET_ID}} \
               --set traction_adapter.env.FIXED_TENANT_ID=${{secrets.FIXED_TENANT_ID}} \
               --set traction_adapter.env.DEFAULT_API_BASE_PATH=${{secrets.DEFAULT_API_BASE_PATH}} \
+              --set demo_server.env.WEBHOOK_SECRET=${{secrets.WEBHOOK_SECRET}} \
+              --set demo_server.env.API_KEY=${{secrets.API_KEY}} \
+              --set demo_server.env.TENANT_ID=${{secrets.TENANT_ID}} \
               . --wait
             
             # Create Certificate for TLS
