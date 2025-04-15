@@ -30,16 +30,6 @@ runs:
         version: ${{ inputs.pnpm-version }}
         run_install: false
 
-    - name: Install mvn
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Generate models
-      shell: bash
-      run: pnpm generate:models
-
     - name: Generate models
       id: generate-models
       shell: bash
