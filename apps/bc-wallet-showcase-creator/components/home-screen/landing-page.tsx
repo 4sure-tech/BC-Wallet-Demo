@@ -14,6 +14,7 @@ import { Card } from '../ui/card'
 import { CopyButton } from '../ui/copy-button'
 import { DeleteButton } from '../ui/delete-button'
 import { OpenButton } from '../ui/external-open-button'
+import { Button } from '../ui/button'
 
 
 const WALLET_URL = env.NEXT_PUBLIC_WALLET_URL
@@ -55,92 +56,89 @@ export const LandingPage = () => {
 
       <section className="mx-auto p-4">
         <div className="grid md:grid-cols-3 gap-6 mt-6 pb-4">
-          {(data?.showcases || []).filter(searchFilter).map((showcase: Showcase) => (
-            <Card key={showcase.id}>
-              <div
-                key={showcase.id}
-                className="bg-white dark:bg-dark-bg rounded-lg overflow-hidden border border-light-border dark:border-dark-border flex flex-col h-full"
-              >
+          {(data?.showcases || [])
+            .filter((showcase: Showcase) => showcase.status === 'ACTIVE')
+            .filter(searchFilter)
+            .map((showcase: Showcase) => (
+              <Card key={showcase.id}>
                 <div
-                  className="relative min-h-[15rem] h-auto flex items-center justify-center bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url('${
-                      showcase?.bannerImage?.id ? `${baseUrl}/assets/${showcase.bannerImage.id}/file` : '/assets/NavBar/Showcase.jpeg'
-                    }')`,
-                  }}
+                  key={showcase.id}
+                  className="bg-white dark:bg-dark-bg rounded-lg overflow-hidden border border-foreground/20 flex flex-col h-full"
                 >
-                  <div className="absolute bg-black bottom-0 left-0 right-0 bg-opacity-70 p-3">
-                    <p className="text-xs text-gray-300 break-words">
-                      {t('showcases.created_by_label', {
-                        name: 'Test college',
-                      })}
-                    </p>
-                    <div className="flex justify-between">
-                      <h2 className="text-lg font-bold text-white break-words">{showcase?.name}</h2>
-                      <div className="flex-shrink-0">
-                        <DeleteButton
-                          onClick={() => {
-                            console.log('delete', showcase.id)
-                          }}
-                        />
-                        <CopyButton value={`${WALLET_URL}/${showcase.slug}`} />
-                        <OpenButton value={`${WALLET_URL}/${showcase.slug}`} />
+                  <div
+                    className="relative min-h-[15rem] h-auto flex items-center justify-center bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url('${showcase?.bannerImage?.id ? `${baseUrl}/assets/${showcase.bannerImage.id}/file` : '/assets/NavBar/Showcase.jpeg'
+                        }')`,
+                    }}
+                  >
+                    <div className="absolute bg-black bottom-0 left-0 right-0 bg-opacity-70 p-3">
+                      <p className="text-xs text-white break-words">
+                        {t('showcases.created_by_label', {
+                          name: 'Test college',
+                        })}
+                      </p>
+                      <div className="flex justify-between">
+                        <h2 className="text-lg font-bold text-white break-words">{showcase?.name}</h2>
+                        <div className="flex-shrink-0">
+                          <CopyButton value={`${WALLET_URL}/${showcase.slug}`} />
+                          <OpenButton value={`${WALLET_URL}/${showcase.slug}`} />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-5 flex flex-col flex-grow">
-                  <h3 className="text-sm font-semibold text-light-text dark:text-dark-text">
-                    {t('showcases.description_label')}
-                  </h3>
-                  <p className="text-light-text dark:text-dark-text text-xs">{showcase?.description}</p>
-                  <h3 className="text-sm font-semibold text-light-text dark:text-dark-text mt-2">
-                    {t('showcases.description_version')}
-                  </h3>
-                  <p className="text-light-text dark:text-dark-text text-xs">{'1.0'}</p>
-                  <div className="mt-4 flex-grow mb-4">
-                    <h4 className="text-sm font-semibold text-light-text dark:text-dark-text">
-                      {t('showcases.character_label')}
-                    </h4>
-                    <div className="mt-2 space-y-3">
-                      {showcase?.personas?.map((persona: any) => (
-                        <div
-                          key={persona.id}
-                          className="border-[1px] border-dark-border dark:border-light-border flex items-center gap-3 p-3 rounded-md"
-                        >
-                          <Image
-                            src={
-                              persona.headshotImage?.id
-                                ? `${baseUrl}/assets/${persona.headshotImage.id}/file`
-                                : '/assets/no-image.jpg'
-                            }
-                            alt={persona.headshotImage?.description || 'Character headshot'}
-                            width={44}
-                            height={44}
-                            className="rounded-full w-[44px] h-[44px]"
-                          />
-                          <div>
-                            <p className="text-base text-foreground font-semibold">{persona.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{persona.role}</p>
+                  <div className="p-5 flex flex-col flex-grow">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {t('showcases.description_label')}
+                    </h3>
+                    <p className="text-foreground/80 text-xs">{showcase?.description}</p>
+                    <h3 className="text-sm font-semibold text-foreground mt-2">
+                      {t('showcases.description_version')}
+                    </h3>
+                    <p className="text-foreground/80 text-xs">{'1.0'}</p>
+                    <div className="mt-4 flex-grow mb-4">
+                      <h4 className="text-sm font-semibold text-foreground/80">
+                        {t('showcases.character_label')}
+                      </h4>
+                      <div className="mt-2 space-y-3">
+                        {showcase?.personas?.map((persona: any) => (
+                          <div
+                            key={persona.id}
+                            className="border-[1px] border-foreground/20 flex items-center gap-3 p-3 rounded-md"
+                          >
+                            <Image
+                              src={
+                                persona.headshotImage?.id
+                                  ? `${baseUrl}/assets/${persona.headshotImage.id}/file`
+                                  : '/assets/no-image.jpg'
+                              }
+                              alt={persona.headshotImage?.description || 'Character headshot'}
+                              width={44}
+                              height={44}
+                              className="rounded-full w-[44px] h-[44px] border border-foreground/20 "
+                            />
+                            <div>
+                              <p className="text-base text-foreground font-semibold">{persona.name}</p>
+                              <p className="text-xs text-foreground/80">{persona.role}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-auto">
+                      <Button variant="outlineAction" className="w-1/2" onClick={() => handlePreview(showcase.slug)}>
+                        {t('action.preview_label')}
+                      </Button>
+                      <Button variant="outlineAction" className="w-1/2 " onClick={() => handleOpen(showcase.slug)}>
+                        {t('action.create_copy_label')}
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex gap-4 mt-auto">
-                    <ButtonOutline className="w-1/2" onClick={() => handlePreview(showcase.slug)}>
-                      {t('action.preview_label')}
-                    </ButtonOutline>
-                    <ButtonOutline className="w-1/2" onClick={() => handleOpen(showcase.slug)}>
-                      {t('action.create_copy_label')}
-                    </ButtonOutline>
-                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
         </div>
       </section>
     </>

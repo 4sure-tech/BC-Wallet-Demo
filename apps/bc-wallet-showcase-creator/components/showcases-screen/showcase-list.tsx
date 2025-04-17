@@ -17,6 +17,7 @@ import Image from 'next/image'
 import Header from '../header'
 import { env } from '@/env'
 import { showcaseStatusLabels } from '@/lib/status-mapping'
+import { Button } from '../ui/button'
 
 const WALLET_URL = env.NEXT_PUBLIC_WALLET_URL
 
@@ -65,7 +66,7 @@ export const ShowcaseList = () => {
 
   return (
     <>
-      <main className={`flex-1 bg-light-bg dark:bg-dark-bg dark:text-dark-text text-light-text `}>
+      <main className={`flex-1 bg-light-bg dark:bg-dark-bg text-foreground `}>
         <Header
           title={t('showcases.header_title')}
           showSearch={true}
@@ -76,8 +77,8 @@ export const ShowcaseList = () => {
         />
 
         {!isLoading && (
-          <div className="mx-auto px-5 mt-2">
-            <div className="flex gap-4 text-sm font-medium">
+          <div className="mx-auto px-5 mt-2 ">
+            <div className="flex gap-6 text-sm font-medium">
               {tabs.map((tab, index) => {
                 const showcaseCount =
                   tab.status === tabs[0].status
@@ -87,14 +88,14 @@ export const ShowcaseList = () => {
                 return (
                   <button
                     key={index}
-                    className={cn("flex items-center gap-1 px-2 py-1", activeTab.status === tab.status
-                        ? 'border-b-2 border-light-blue dark:border-white dark:text-dark-text text-light-blue font-bold cursor-pointer'
-                        : 'text-gray-800/50 dark:text-gray-200/50'
+                    className={`flex items-center gap-1 py-1 ${activeTab.status === tab.status
+                      ? 'border-b-2 border-foreground/80 text-foreground font-bold cursor-pointer'
+                      : 'text-foreground/50 hover:text-foreground/80 cursor-pointer'
                       }`}
                     onClick={() => setActiveTab(tab)}
                   >
                     <div className="font-bold text-base">{tab.label}</div>
-                    <span className="bg-light-bg-secondary dark:dark-bg-secondary text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-foreground/10 text-foreground/80 text-xs px-2 py-0.5 rounded-full">
                       {showcaseCount}
                     </span>
                   </button>
@@ -121,7 +122,7 @@ export const ShowcaseList = () => {
                 <Card key={showcase.id}>
                   <div
                     key={showcase.id}
-                    className="bg-white dark:bg-dark-bg rounded-lg overflow-hidden border border-light-border dark:border-dark-border flex flex-col h-full"
+                    className="bg-white dark:bg-dark-bg rounded-lg overflow-hidden border border-foreground/20 flex flex-col h-full"
                   >
                     <div
                       className="relative min-h-[15rem] h-auto flex items-center justify-center bg-cover bg-center"
@@ -141,9 +142,8 @@ export const ShowcaseList = () => {
 
                         </p>
                       </div>
-                      <div className="absolute bg-black bottom-0 left-0 right-0 bg-opacity-70 p-3"></div>
                       <div className="absolute bg-black bottom-0 left-0 right-0 bg-opacity-70 p-3">
-                        <p className="text-xs text-gray-300 break-words">
+                        <p className="text-xs text-white break-words">
                           {t('showcases.created_by_label', {
                             name: 'Test college',
                           })}
@@ -151,12 +151,6 @@ export const ShowcaseList = () => {
                         <div className="flex justify-between">
                           <h2 className="text-lg font-bold text-white break-words">{showcase?.name}</h2>
                           <div className="flex-shrink-0">
-                            <DeleteButton
-                              onClick={() => {
-                                console.log('delete', showcase.id)
-                              }}
-                            />
-
                             <CopyButton value={`${WALLET_URL}/${showcase.slug}`} />
                             <OpenButton value={`${WALLET_URL}/${showcase.slug}`} />
                           </div>
@@ -165,24 +159,24 @@ export const ShowcaseList = () => {
                     </div>
 
                     <div className="p-5 flex flex-col flex-grow">
-                      <h3 className="text-sm font-semibold text-light-text dark:text-dark-text">
+                      <h3 className="text-sm font-semibold text-foreground">
                         {t('showcases.description_label')}
                       </h3>
-                      <p className="text-light-text dark:text-dark-text text-xs">{showcase.description}</p>
-                      <h3 className="text-sm font-semibold text-light-text dark:text-dark-text mt-2">
+                      <p className="text-foreground/80 text-xs">{showcase.description}</p>
+                      <h3 className="text-sm font-semibold text-foreground mt-2">
                         {t('showcases.description_version')}
                       </h3>
-                      <p className="text-light-text dark:text-dark-text text-xs">1.0</p>
+                      <p className="text-foreground/80 text-xs">1.0</p>
 
                       <div className="mt-4 flex-grow mb-4">
-                        <h4 className="text-sm font-semibold text-light-text dark:text-dark-text">
+                        <h4 className="text-sm font-semibold text-foreground">
                           {t('showcases.character_label')}
                         </h4>
                         <div className="mt-2 space-y-3">
                           {showcase?.personas?.map((persona: Persona) => (
                             <div
                               key={persona.id}
-                              className="border-[1px] border-dark-border dark:border-light-border flex items-center gap-3 p-3 rounded-md"
+                              className="border-[1px] border-foreground/20 flex items-center gap-3 p-3 rounded-md"
                             >
                               <Image
                                 src={
@@ -197,7 +191,7 @@ export const ShowcaseList = () => {
                               />
                               <div>
                                 <p className="text-base text-foreground font-semibold">{persona.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{persona.role}</p>
+                                <p className="text-xs text-foreground/80">{persona.role}</p>
                               </div>
                             </div>
                           ))}
@@ -206,17 +200,17 @@ export const ShowcaseList = () => {
 
                       <div className="flex gap-4 mt-auto">
                         <Link className="w-1/2" href={`/showcases/${showcase.slug}`}>
-                          <ButtonOutline
+                          <Button 
                             className="w-full"
-                            // disabled
+                            variant="outlineAction"
                             onClick={() => deleteShowcase(showcase.slug)}
                           >
                             {t('action.edit_label')}
-                          </ButtonOutline>
+                          </Button>
                         </Link>
-                        <ButtonOutline onClick={() => createShowcase()} disabled className="w-1/2">
+                        <Button variant="outlineAction" onClick={() => createShowcase()} disabled className="w-1/2">
                           {t('action.create_copy_label')}
-                        </ButtonOutline>
+                        </Button>
                       </div>
                     </div>
                   </div>
