@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Header from '../header'
 import { env } from '@/env'
+import { showcaseStatusLabels } from '@/lib/status-mapping'
 
 const WALLET_URL = env.NEXT_PUBLIC_WALLET_URL
 
@@ -86,11 +87,10 @@ export const ShowcaseList = () => {
                 return (
                   <button
                     key={index}
-                    className={`flex items-center gap-1 px-2 py-1 ${
-                      activeTab.status === tab.status
+                    className={`flex items-center gap-1 px-2 py-1 ${activeTab.status === tab.status
                         ? 'border-b-2 border-light-blue dark:border-white dark:text-dark-text text-light-blue font-bold cursor-pointer'
                         : 'text-gray-800/50 dark:text-gray-200/50'
-                    }`}
+                      }`}
                     onClick={() => setActiveTab(tab)}
                   >
                     <div className="font-bold text-base">{tab.label}</div>
@@ -126,19 +126,19 @@ export const ShowcaseList = () => {
                     <div
                       className="relative min-h-[15rem] h-auto flex items-center justify-center bg-cover bg-center"
                       style={{
-                        backgroundImage: `url('${
-                          showcase?.bannerImage?.id ? `${baseUrl}/assets/${showcase.bannerImage.id}/file` : '/assets/NavBar/Showcase.jpeg'
-                        }')`,
+                        backgroundImage: `url('${showcase?.bannerImage?.id ? `${baseUrl}/assets/${showcase.bannerImage.id}/file` : '/assets/NavBar/Showcase.jpeg'
+                          }')`,
                       }}
                     >
                       <div
                         className={cn(
-                          'left-4 right-0 top-4 py-2 rounded w-1/4 absolute',
+                          'absolute top-4 left-4 rounded-md px-3 py-1 text-md font-normal shadow',
                           showcase.status == 'ACTIVE' ? 'bg-yellow-500' : 'bg-dark-grey',
                         )}
                       >
                         <p className={cn('text-center', showcase.status == 'ACTIVE' ? 'text-black' : 'text-white')}>
-                          {showcase.status}
+                          <span>{showcaseStatusLabels[showcase.status] || showcase.status}</span>
+
                         </p>
                       </div>
                       <div className="absolute bg-black bottom-0 left-0 right-0 bg-opacity-70 p-3"></div>
