@@ -20,20 +20,30 @@ export class AdapterClientApi {
   }
 
   private async init(): Promise<void> {
-    if (this.isConnected) {
-      if (!this.sender?.isOpen() || !this.sender?.isRemoteOpen() || !this.connection.isOpen()) {
-        return Promise.reject(Error('AMQP connection or sender is no longer connected.'))
+    try {
+      if (this.isConnected) {
+        if (!this.sender?.isOpen() || !this.sender?.isRemoteOpen() || !this.connection.isOpen()) {
+          return Promise.reject(Error('AMQP connection or sender is no longer connected.'))
+        }
+        return
       }
-      return
+      await this.connection.open()
+      this.sender = await this.connection.createSender({
+        target: { address: environment.messageBroker.MESSAGE_PROCESSOR_TOPIC },
+      })
+      this.isConnected = true
+    } catch (e) {
+      console.warn('AMQ connection failed', e) // FIXME remove ASAP
     }
-    await this.connection.open()
-    this.sender = await this.connection.createSender({
-      target: { address: environment.messageBroker.MESSAGE_PROCESSOR_TOPIC },
-    })
-    this.isConnected = true
   }
 
   private async send(action: Action, payload: object, authHeader?: string): Promise<void> {
+    if (!this.isConnected) {
+      // FIXME remove ASAP
+      console.warn('No AMQ connection')
+      return
+    }
+
     try {
       await this.isInitComplete
 
