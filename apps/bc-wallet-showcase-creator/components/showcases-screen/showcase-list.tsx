@@ -87,7 +87,7 @@ export const ShowcaseList = () => {
                 return (
                   <button
                     key={index}
-                    className={`flex items-center gap-1 px-2 py-1 ${activeTab.status === tab.status
+                    className={cn("flex items-center gap-1 px-2 py-1", activeTab.status === tab.status
                         ? 'border-b-2 border-light-blue dark:border-white dark:text-dark-text text-light-blue font-bold cursor-pointer'
                         : 'text-gray-800/50 dark:text-gray-200/50'
                       }`}
