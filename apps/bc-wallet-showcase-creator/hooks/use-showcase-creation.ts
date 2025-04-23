@@ -1,12 +1,7 @@
 import { useState, useCallback } from "react";
 import { useShowcaseStore } from "@/hooks/use-showcases-store";
-import type { 
-  ScenarioRequestType, 
-  StepRequestType,
-  AriesOOBActionRequest,
-  IssuanceScenarioRequestType,
-} from "@/openapi-types";
-import type { Persona } from "bc-wallet-openapi";
+
+import type { AriesOOBActionRequest, IssuanceScenarioRequest, Persona, StepActionRequest, StepRequest } from "bc-wallet-openapi";
 import { sampleAction } from "@/lib/steps";
 import { useHelpersStore } from "@/hooks/use-helpers-store";
 import { usePersonas } from "@/hooks/use-personas";
@@ -20,7 +15,7 @@ export const useShowcaseCreation = () => {
   const { issuerId, selectedCredentialDefinitionIds } = useHelpersStore();
   
   const [personaScenarios, setPersonaScenarios] = useState(() => {
-    const initialScenarios = new Map<string, IssuanceScenarioRequestType>();
+    const initialScenarios = new Map<string, IssuanceScenarioRequest>();
     
     const personas = (personasData?.personas || []).filter(
       (persona: Persona) => selectedPersonaIds.includes(persona.id)
@@ -30,28 +25,35 @@ export const useShowcaseCreation = () => {
       initialScenarios.set(persona.id, {
         name: `${persona.name}'s Journey`,
         description: `Onboarding scenario for ${persona.name}`,
-        type: 'ISSUANCE',
         steps: [
           {
             title: `Meet ${persona.name}`,
             description: `Welcome to this showcase. Here you'll learn about digital credentials with ${persona.name}.`,
             order: 0,
             type: 'HUMAN_TASK',
-            actions: [sampleAction],
+            actions: [],
           },
           {
             title: "Let's get started!",
             description: `BC Wallet is a new app for storing and using credentials on your smartphone. Credentials are things like IDs, licenses and diplomas. Using your BC Wallet is fast and simple. In the future it can be used online and in person. You approve every use, and share only what is needed. In this demo, you will use two credentials to prove who you are and access court materials online instead of in-person.`,
             order: 1,
             type: 'HUMAN_TASK',
-            actions: [sampleAction],
+            actions: [],
           },
           {
             title: 'Install BC Wallet',
             description: `First, install the BC Wallet app onto your smartphone. Select the button below for instructions and the next step.`,
             order: 2,
             type: 'HUMAN_TASK',
-            actions: [sampleAction],
+            actions: [{
+              title: "example_title",
+              actionType: "CHOOSE_WALLET" as "CHOOSE_WALLET",
+              text: "example_text",
+              proofRequest: {
+                attributes: {},
+                predicates: {},
+              },
+            }],
           },
           {
             title: 'Connect with BC College',
@@ -74,7 +76,7 @@ export const useShowcaseCreation = () => {
                     predicate1: {
                       name: "example_name",
                       type: "example_type",
-                      value: "example_value",
+                      value: 1,
                       restrictions: ["restriction1", "restriction2"],
                     },
                   },
@@ -94,7 +96,7 @@ export const useShowcaseCreation = () => {
             description: `Congratulations, you’ve just received your first digital credentials. They are safely stored in your wallet and ready to be used. So, what are you waiting for? Let’s go! We're done with this step. Next, we'll explore ways you can use your credentials.`,
             order: 5,
             type: 'HUMAN_TASK',
-            actions: [sampleAction],
+            actions: [],
           },
         ],
         personas: [persona.id],
@@ -117,7 +119,7 @@ export const useShowcaseCreation = () => {
     (persona: Persona) => selectedPersonaIds.includes(persona.id)
   );
   
-  const updatePersonaSteps = useCallback((personaId: string, steps: StepRequestType[]) => {
+  const updatePersonaSteps = useCallback((personaId: string, steps: StepRequest[]) => {
     setPersonaScenarios(prevScenarios => {
       if (!prevScenarios.has(personaId)) {
         return prevScenarios;
@@ -136,7 +138,7 @@ export const useShowcaseCreation = () => {
   const addActionToStep = useCallback((
     personaId: string, 
     stepIndex: number, 
-    action: typeof AriesOOBActionRequest._type
+    action: AriesOOBActionRequest
   ) => {
     setPersonaScenarios(prevScenarios => {
       if (!prevScenarios.has(personaId)) {
@@ -153,7 +155,7 @@ export const useShowcaseCreation = () => {
       const step = steps[stepIndex];
       const actions = [...(step.actions || []), action];
       
-      steps[stepIndex] = { ...step, actions };
+      steps[stepIndex] = { ...step, actions: actions as StepActionRequest[] };
       
       const newScenarios = new Map(prevScenarios);
       newScenarios.set(personaId, {
@@ -171,10 +173,9 @@ export const useShowcaseCreation = () => {
         return prevScenarios;
       }
       
-      const defaultScenario: ScenarioRequestType = {
+      const defaultScenario: IssuanceScenarioRequest = {
         name: `${persona.name}'s Journey`,
         description: `Onboarding scenario for ${persona.name}`,
-        type: "ISSUANCE",
         steps: [
           {
             title: `Meet ${persona.name}`,
@@ -190,7 +191,7 @@ export const useShowcaseCreation = () => {
       };
       
       const newScenarios = new Map(prevScenarios);
-      newScenarios.set(persona.id, defaultScenario as IssuanceScenarioRequestType);
+      newScenarios.set(persona.id, defaultScenario as IssuanceScenarioRequest);
       return newScenarios;
     });
   }, []);

@@ -1,12 +1,12 @@
-import { useCredentials } from '@/hooks/use-credentials-store'
 import { usePresentationAdapter } from '@/hooks/use-presentation-adapter'
 import { cn, baseUrl } from '@/lib/utils'
-import type { Step } from '@/openapi-types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { CredentialDefinition, StepRequest } from 'bc-wallet-openapi'
 import { Copy, GripVertical, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
+import { Screen } from '@/types'
 
 const MAX_CHARS = 50
 
@@ -15,17 +15,14 @@ export const SortableStep = ({
   myScreen,
   stepIndex,
   scenarioIndex,
-  totalSteps,
 }: {
   selectedStep: { stepIndex: number, scenarioIndex: number } | null
-  myScreen: typeof Step._type
+  myScreen: Screen
   stepIndex: number
-  totalSteps: number
   scenarioIndex: number
 }) => {
   const t = useTranslations()
-  const { handleSelectStep, duplicateStep, activePersonaId, setSelectedStep, setStepState, activeScenarioIndex, setActiveScenarioIndex } = usePresentationAdapter()
-  const { selectedCredential } = useCredentials()
+  const { handleSelectStep, duplicateStep, activePersonaId, setStepState, activeScenarioIndex, setActiveScenarioIndex } = usePresentationAdapter()
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: myScreen.id || `step-${scenarioIndex}-${stepIndex}`,
@@ -37,44 +34,17 @@ export const SortableStep = ({
   }
 
 const handleStepClick = () => {
-  const ScreenType = myScreen.type;
-
-  console.log('Step clicked!', { 
-    stepIndex, 
-    scenarioIndex,
-    myScreen: {
-      type: myScreen.type,
-      title: myScreen.title
-    }
-  });
-  
   setStepState('editing-basic')
-  // switch (ScreenType) {
-  //   case 'HUMAN_TASK':
-  //     setStepState('editing-basic')
-  //     break;
-  //   case 'SERVICE':
-  //     setStepState('editing-basic')
-  //     break;
-  //   default:
-  //     setStepState('editing-basic')
-  //     break;
-  // }
   handleSelectStep(stepIndex, scenarioIndex)
-  // setStepState('editing-issue');
 
   if (activeScenarioIndex !== scenarioIndex) {
     setActiveScenarioIndex(scenarioIndex);
   }
-  // setSelectedScenario(stepIndex);
 };
 
   const handleCopyStep = (stepIndex: number, scenarioIndex: number) => {
     try {
-      console.log('Duplicating step:', { stepIndex, scenarioIndex })
-
       if (!activePersonaId) {
-        console.error('Cannot duplicate - no active persona')
         return
       }
 
@@ -116,7 +86,7 @@ const handleStepClick = () => {
       <div className="bg-light-bg dark:bg-dark-bg flex flex-col w-full cursor-pointer" onClick={handleStepClick}>
         <div
           className={cn(
-            'min-h-28  w-full hover:bg-light-btn-hover dark:hover:bg-dark-btn-hover',
+            'min-h-28 w-full hover:bg-light-btn-hover dark:hover:bg-dark-btn-hover',
             'flex flex-col justify-center rounded p-3',
             'border-b-2 border-light-border dark:border-dark-border',
             selectedStep?.stepIndex === stepIndex ? 'border-foreground' : 'border-light-bg-secondary',
@@ -143,7 +113,7 @@ const handleStepClick = () => {
                 </div>
                 </>
               ) : (
-                myScreen.credentials.map((cred:any, index) => (
+                myScreen.credentials.map((cred: CredentialDefinition, index:number) => (
                   <div
                     key={cred.id ?? index}
                     className="bg-white dark:bg-dark-bg-secondary p-2 flex mt-2 rounded"
@@ -162,12 +132,12 @@ const handleStepClick = () => {
                       alt={'Credential Icon'}
                       width={50}
                       height={50}
-                      className="rounded-full"
+                      className="rounded-full object-cover"
                     />
-                    <div className="ml-4 flex-col">
+                    {/* <div className="ml-4 flex-col">
                       <div className="font-semibold">{cred.name}</div>
                       <div className="text-sm">{cred.issuer?.name ?? 'Test college'}</div>
-                    </div>
+                    </div> */}
                     <div className="align-middle ml-auto text-right">
                       <div className="font-semibold">{t('credentials.attributes_label')}</div>
                       <div className="text-sm text-end">

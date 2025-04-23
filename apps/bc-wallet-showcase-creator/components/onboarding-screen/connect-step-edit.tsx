@@ -11,9 +11,8 @@ import { useDeleteStep } from '@/hooks/use-issue-step'
 import { useOnboarding, useCreateScenario } from '@/hooks/use-onboarding'
 import { useShowcaseStore } from '@/hooks/use-showcases-store'
 import { useRouter } from '@/i18n/routing'
-import type { ScenarioRequestType, IssuanceScenarioResponseType } from '@/openapi-types'
-import type { BasicStepFormData, ConnectStepFormData } from '@/schemas/onboarding'
-import { basicStepSchema, connectStepSchema } from '@/schemas/onboarding'
+import type { ConnectStepFormData } from '@/schemas/onboarding'
+import { connectStepSchema } from '@/schemas/onboarding'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit, Monitor } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -25,6 +24,7 @@ import Loader from '../loader'
 import StepHeader from '../step-header'
 import ButtonOutline from '../ui/button-outline'
 import { LocalFileUpload } from './local-file-upload'
+import { IssuanceScenarioRequest } from 'bc-wallet-openapi'
 
 export const ConnectStepEdit = () => {
   const t = useTranslations()
@@ -41,7 +41,6 @@ export const ConnectStepEdit = () => {
   const router = useRouter()
 
   const isEditMode = stepState === 'editing-connect'
-  const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showErrorModal, setErrorModal] = useState(false)
 
@@ -66,10 +65,9 @@ export const ConnectStepEdit = () => {
   })
 
   const handleCreateScenario = async () => {
-    const data: ScenarioRequestType = {
+    const data: IssuanceScenarioRequest = {
       name: 'example_name',
       description: 'example_description',
-      type: 'ISSUANCE' as 'ISSUANCE' | 'PRESENTATION',
       issuer: issuerId,
       steps: [
         {
@@ -83,22 +81,6 @@ export const ConnectStepEdit = () => {
               title: 'example_title',
               actionType: 'ARIES_OOB',
               text: 'example_text',
-              proofRequest: {
-                attributes: {
-                  attribute1: {
-                    attributes: ['attribute1', 'attribute2'],
-                    restrictions: ['restriction1', 'restriction2'],
-                  },
-                },
-                predicates: {
-                  predicate1: {
-                    name: 'example_name',
-                    type: 'example_type',
-                    value: 'example_value',
-                    restrictions: ['restriction1', 'restriction2'],
-                  },
-                },
-              },
             },
           ],
         },
@@ -107,10 +89,12 @@ export const ConnectStepEdit = () => {
     }
 
     await mutateAsync(data, {
-      onSuccess: (data: unknown) => {
-        toast.success('Scenario Created')
-        setScenarioIds([(data as IssuanceScenarioResponseType).issuanceScenario.id])
-        router.push(`/showcases/create/scenarios`)
+      onSuccess: (data) => {
+        if (data.issuanceScenario) {
+          toast.success('Scenario Created')
+          setScenarioIds([data.issuanceScenario?.id])
+          router.push(`/showcases/create/scenarios`)
+        }
       },
     })
   }
@@ -221,7 +205,6 @@ export const ConnectStepEdit = () => {
                 case 'delete':
                   console.log('Delete Page clicked')
                   setIsModalOpen(true)
-                  setIsOpen(false)
                   break
                 default:
                   console.log('Unknown action')
