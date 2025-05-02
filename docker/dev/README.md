@@ -72,7 +72,6 @@ TRACTION_DEFAULT_API_KEY=your_traction_api_key
 TRACTION_API_URL=https://traction-api-url/tenant/
 TRACTION_WEBHOOK_SECRET=your_webhook_secret
 
-# Optional: OIDC configuration (if using authentication)
 OIDC_REALM=your_realm
 OIDC_CLIENT_ID=your_client_id
 OIDC_CLIENT_SECRET=your_client_secret
@@ -160,7 +159,7 @@ TRACTION_ADAPTER_MESSAGE_TOPIC=traction-adapter-messages
 
 ### Authentication Configuration
 
-For OIDC authentication (optional):
+For OIDC authentication:
 
 ```
 OIDC_REALM=your_realm
