@@ -82,6 +82,8 @@ function getTenantIdFromRequest(nextReq?: NextRequest): string | undefined {
   }
 
   const cookies = nextReq.cookies
+  console.debug('Headers:', nextReq.headers)
+  console.debug('Cookies:', Object.fromEntries(cookies))
 
   let tenantId: string | undefined
   if (!tenantId) {
