@@ -32,7 +32,7 @@ export const DisplayStepCredentials = ({
 
   if (!credentialId) {
     return (
-      <div className="m-5 p-5 w-full h-60">
+      <div className="m-5 p-5 w-full h-full">
         <NoSelection text="No Credentials Added" />
       </div>
     )
