@@ -1,11 +1,13 @@
 import React from 'react'
+
 import { trackSelfDescribingEvent } from '@snowplow/browser-tracker'
 import { motion } from 'framer-motion'
 import { startCase } from 'lodash'
+
+import { showcaseServerBaseUrl } from '../../../api/BaseUrl'
 import { rowFadeX } from '../../../FramerAnimations'
-import { StartButton } from './StartButton'
-import { showcaseServerBaseUrl } from '../../../api/BaseUrl';
 import type { CredentialDefinition, Persona } from '../../../slices/types'
+import { StartButton } from './StartButton'
 
 export interface Props {
   slug: string
@@ -14,6 +16,7 @@ export interface Props {
   requiredCredentials: CredentialDefinition[]
   isCompleted: boolean
   isLocked: boolean
+
   start(scenarioSlug: string): void
 }
 
@@ -40,11 +43,13 @@ export const UseCaseItem: React.FC<Props> = ({
             {requiredCredentials.map((requiredCredential) => {
               return (
                 <div key={requiredCredential.id} className={`flex flex-row mb-2`}>
-                  <img
-                    className="w-4 h-4 lg:w-6 lg:h-6 mx-2"
-                    src={`${showcaseServerBaseUrl}/assets/${requiredCredential.icon}/file`}
-                    alt="credential icon"
-                  />
+                  {requiredCredential.icon && (
+                    <img
+                      className="w-4 h-4 lg:w-6 lg:h-6 mx-2"
+                      src={`${showcaseServerBaseUrl}/assets/${requiredCredential.icon}/file`}
+                      alt="credential icon"
+                    />
+                  )}
                   <p className="text-xs sxl:text-sm">{startCase(requiredCredential.name)}&nbsp;</p>
                 </div>
               )
