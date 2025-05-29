@@ -157,7 +157,7 @@ export const BasicStepEdit = ({ slug }: { slug?: string }) => {
                 ? step.actions.map((action) => ({
                     ...action,
                     actionType: "ARIES_OOB",
-                    credentialDefinitionId: selectedCredential?.id,
+                    credentialDefinitionId: action?.credentialDefinitionId,
                   }))
                 : step.actions,
           };
