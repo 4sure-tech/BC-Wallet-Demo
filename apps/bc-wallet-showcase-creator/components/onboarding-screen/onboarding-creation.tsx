@@ -1,6 +1,6 @@
 'use client'
 
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { DndContext, closestCenter, DragOverlay } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useTranslations } from 'next-intl'
@@ -25,6 +25,7 @@ export const CreateOnboardingScreen = ({ showcaseSlug }: { showcaseSlug?: string
     personas, 
     activePersonaId, 
     setActivePersonaId, 
+    setSelectedStep,
     activePersona,
   } = useOnboardingAdapter(showcaseSlug)
   
@@ -32,17 +33,35 @@ export const CreateOnboardingScreen = ({ showcaseSlug }: { showcaseSlug?: string
   const router = useRouter()
   const { tenantId } = useTenant();
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over) return
+  const parseId = (composedId: string) => {
+  const match = composedId.match(/^step-(\d+)-(\d+)$/);
+  if (!match) return null;
+  const stepIndex = parseInt(match[1], 10);
+  const scenarioIndex = parseInt(match[2], 10);
+  return { stepIndex, scenarioIndex };
+};
 
-    const oldIndex = steps.findIndex((step) => step.id === active.id)
-    const newIndex = steps.findIndex((step) => step.id === over.id)
-  
-    if (oldIndex !== newIndex && oldIndex >= 0 && newIndex >= 0) {
-      handleMoveStep(oldIndex, newIndex)
+const handleDragStart = (event: DragStartEvent) => {
+  const parsed = parseId(event.active.id as string);
+  if (!parsed) return;
+
+  const index = parsed.stepIndex;
+  setSelectedStep(index);
+};
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const from = parseId(event.active.id as string);
+    const to = parseId(event.over?.id as string);
+    if (!from || !to) return;
+
+    const oldIndex = from.stepIndex;
+    const newIndex = to.stepIndex;
+
+    if (oldIndex !== newIndex) {
+      handleMoveStep(oldIndex, newIndex);
     }
-  }
+  };
+
 
   return (
     <div className="bg-background text-light-text dark:text-dark-text rounded-md border shadow-sm">
@@ -98,7 +117,7 @@ export const CreateOnboardingScreen = ({ showcaseSlug }: { showcaseSlug?: string
             </div>
           </div>
 
-          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <SortableContext items={steps.map((step) => step.id)} strategy={verticalListSortingStrategy}>
               {steps.length === 0 ? (
                 <div className="text-center text-gray-500 p-4">

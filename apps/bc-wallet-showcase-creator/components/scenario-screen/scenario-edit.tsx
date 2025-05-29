@@ -43,11 +43,17 @@ export const ScenarioEdit = ({ slug }: { slug?: string }) => {
     }
   }, [selectedScenario, form.reset])
 
-  const onSubmit = (data: PresentationScenarioRequest) => {
-    if (selectedScenario === null) return
+  const onSubmit = (data: PresentationScenarioRequest) => { 
+      if (selectedScenario === null) return
 
-    // updateScenario(selectedScenario, updatedScenario)
-    setStepState('no-selection')
+      const updatedScenario = {
+        ...selectedScenario,
+        name:data.name,
+        description: data.description
+      }
+
+      updateScenario(updatedScenario)
+      setStepState('no-selection')
   }
 
   if (!selectedScenario) return null
@@ -206,13 +212,13 @@ export const ScenarioEdit = ({ slug }: { slug?: string }) => {
             </ButtonOutline>
             <ButtonOutline
               type="submit"
-              // disabled={!form.formState.isDirty || !form.formState.isValid}
+              disabled={!form.formState.isDirty || !form.formState.isValid}
             >
               {t('action.save_label')}
             </ButtonOutline>
-            <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
+            {/* <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
               {t('action.save_label')}
-            </Button>
+            </Button> */}
           </div>
         </form>
       </Form>
