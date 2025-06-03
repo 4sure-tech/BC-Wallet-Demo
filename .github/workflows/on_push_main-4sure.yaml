@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - k3s-deployment
-      - main
       - develop-4sure
     paths:
         - "apps/bc-wallet-api-server/**"
