@@ -484,6 +484,8 @@ rabbitmq:
   extraPlugins: "rabbitmq_management,rabbitmq_peer_discovery_k8s"
   configuration: |-
     management.load_definitions = /app/load_definitions.json
+    management.tcp.port = 15672
+    management.tcp.ip = 0.0.0.0
   extraConfiguration: |-
     load_definitions = /app/load_definitions.json
   service:
@@ -504,5 +506,19 @@ rabbitmq:
       memory: 256Mi
   containerSecurityContext:
     enabled: false
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
 
 debug: true  # Enable debug mode to create the debug-helper ConfigMap
