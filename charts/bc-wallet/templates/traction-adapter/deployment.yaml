@@ -31,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "bc-wallet.serviceAccountName" . }}
+      serviceAccountName: {{ if .Values.tractionAdapter.serviceAccount.create }}{{ include "bc-wallet.fullname" . }}-{{ .Values.tractionAdapter.serviceAccount.name }}{{ end }}
       {{- with .Values.tractionAdapter.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -59,26 +59,6 @@ spec:
               value: {{ .Values.tractionAdapter.env.TRACTION_DEFAULT_API_URL | quote }}
             - name: FIXED_SHOWCASE_API_URL
               value: {{ .Values.tractionAdapter.env.FIXED_SHOWCASE_API_URL | quote }}
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.encryption.secret.name" . }}
-                  key: key
-            - name: TRACTION_DEFAULT_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.traction.secret.name" . }}
-                  key: api-key
-            - name: TRACTION_DEFAULT_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.traction.secret.name" . }}
-                  key: tenant-id
-            - name: TRACTION_DEFAULT_WALLET_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.traction.secret.name" . }}
-                  key: wallet-id
           {{- include "bc-wallet.renderEnvFrom" (list "tractionAdapter" .) | nindent 10 }}
           {{- with .Values.tractionAdapter.livenessProbe }}
           livenessProbe:

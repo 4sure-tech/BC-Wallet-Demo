@@ -31,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ if .Values.demoServer.serviceAccount.create }}{{ if .Values.demoServer.serviceAccount.name }}{{ .Values.demoServer.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.demoServer.name }}{{ end }}{{ end }}
+      serviceAccountName: {{ if .Values.demoServer.serviceAccount.create }}{{ include "bc-wallet.fullname" . }}-{{ .Values.demoServer.serviceAccount.name }}{{ end }}
       {{- with .Values.demoServer.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

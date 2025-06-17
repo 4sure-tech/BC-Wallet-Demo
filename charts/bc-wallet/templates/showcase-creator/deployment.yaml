@@ -31,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ if .Values.showcaseCreator.serviceAccount.create }}{{ if .Values.showcaseCreator.serviceAccount.name }}{{ .Values.showcaseCreator.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.showcaseCreator.name }}{{ end }}{{ end }}
+      serviceAccountName: {{ if .Values.showcaseCreator.serviceAccount.create }}{{ include "bc-wallet.fullname" . }}-{{ .Values.showcaseCreator.serviceAccount.name }}{{ end }}
       {{- with .Values.showcaseCreator.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -56,11 +56,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "bc-wallet.database.secret.name" . }}
                   key: {{ include "bc-wallet.database.userPasswordKey" . }}
-            - name: AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
-                  key: token
             - name: NEXT_PUBLIC_WALLET_URL
               value: {{ .Values.showcaseCreator.env.NEXT_PUBLIC_WALLET_URL | quote }}
             - name: NEXT_PUBLIC_SHOWCASE_API_URL
