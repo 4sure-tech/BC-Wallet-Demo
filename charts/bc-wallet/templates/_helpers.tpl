@@ -101,7 +101,7 @@ Define database user password key - used to reference PostgreSQL generated secre
 {{- if .Values.postgresql.auth.secretKeys.userPasswordKey -}}
 {{- printf "%s" .Values.postgresql.auth.secretKeys.userPasswordKey -}}
 {{- else -}}
-password
+postgres-password
 {{- end -}}
 {{- end -}}
 
