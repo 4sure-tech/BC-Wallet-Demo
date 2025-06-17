@@ -1,6 +1,6 @@
 apiVersion: v2
-name: bc-wallet
-description: BC Wallet services with PostgreSQL and RabbitMQ
+name: bc-wallet-demo
+description: BC Wallet Demo services with PostgreSQL and RabbitMQ
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
