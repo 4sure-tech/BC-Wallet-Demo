@@ -551,6 +551,8 @@ postgresql:
     database: bcwallet
     # Let the chart generate and manage its own password
     password: ""
+    secretKeys:
+      password: postgres-password
   primary:
     service:
       ports:
