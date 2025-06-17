@@ -180,141 +180,18 @@ jobs:
             # Update dependencies and deploy with Helm
             helm dependency update
             
-            helm upgrade --install bc-wallet -f ./values.yaml \
-              --set api_server.image.tag=${{ needs.build_api_server.outputs.image_tag }} \
-              --set traction_adapter.image.tag=${{ needs.build_traction_adapter.outputs.image_tag }} \
-              --set showcase_creator.image.tag=${{ needs.build_showcase_creator.outputs.image_tag }} \
-              --set demo_web.image.tag=${{ needs.build_demo_web.outputs.image_tag }} \
-              --set demo_server.image.tag=${{ needs.build_demo_server.outputs.image_tag }} \
-              --set traction_adapter.env.ENCRYPTION_KEY=${{secrets.ENCRYPTION_KEY}} \
-              --set traction_adapter.env.TRACTION_DEFAULT_API_KEY=${{secrets.FIXED_API_KEY}} \
-              --set traction_adapter.env.TRACTION_DEFAULT_TENANT_ID=${{secrets.FIXED_TENANT_ID}} \
-              --set traction_adapter.env.TRACTION_DEFAULT_WALLET_ID=${{secrets.FIXED_WALLET_ID}} \
-              --set rabbitmq.auth.username=${{secrets.RABBITMQ_USERNAME}} \
-              --set rabbitmq.auth.password=${{secrets.RABBITMQ_PASSWORD}} \
-              --set demo_server.env.TRACTION_WEBHOOK_SECRET=${{secrets.WEBHOOK_SECRET}} \
-              --set demo_server.env.API_KEY=${{secrets.API_KEY}} \
-              --set api_server.env.API_KEY=${{secrets.API_KEY}} \
-              --set demo_server.env.TENANT_ID=${{secrets.TENANT_ID}} \
-              --set demo_server.env.WALLET_KEY=${{secrets.WALLET_KEY}} \
-              --set api_server.env.ENCRYPTION_KEY=${{secrets.ENCRYPTION_KEY}} \
-              --set api_server.env.OIDC_ROOT_CLIENT_SECRET=${{secrets.CLIENT_SECRET}} \
-              --set demo_web.env.REACT_APP_SNOWPLOW_ENDPOINT=${{secrets.REACT_APP_SNOWPLOW_ENDPOINT}} \
+            helm upgrade --install bc-wallet-demo --namespace testing \
+              --set global.extraEnvVarsSecret=bc-wallet-secrets \
+              --set apiServer.image.tag=${{ needs.build_api_server.outputs.image_tag }} \
+              --set tractionAdapter.image.tag=${{ needs.build_traction_adapter.outputs.image_tag }} \
+              --set showcaseCreator.image.tag=${{ needs.build_showcase_creator.outputs.image_tag }} \
+              --set demoWeb.image.tag=${{ needs.build_demo_web.outputs.image_tag }} \
+              --set demoServer.image.tag=${{ needs.build_demo_server.outputs.image_tag }} \
+              --set postgresql.primary.persistence.storageClass=local-path \
+              --set rabbitmq.persistence.storageClass=local-path \
+              --set ingress.enabled=true \
+              --set ingress.className=traefik \
               . --wait
-            
-            # Create Certificate for TLS
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: cert-manager.io/v1
-            kind: Certificate
-            metadata:
-              name: bc-wallet-tls
-            spec:
-              secretName: bc-wallet-tls
-              issuerRef:
-                name: letsencrypt-prod
-                kind: ClusterIssuer
-              dnsNames:
-                - bcshowcase-api.dev.nborbit.ca
-                - bcshowcase-traction.dev.nborbit.ca
-                - bcshowcase-ui.dev.nborbit.ca
-                - bcshowcase-demo-web.dev.nborbit.ca
-                - bcshowcase-demo-server.dev.nborbit.ca
-            EOF
-            
-            # Create Traefik IngressRoute for API Server
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: traefik.containo.us/v1alpha1
-            kind: IngressRoute
-            metadata:
-              name: api-server-route
-            spec:
-              entryPoints:
-                - websecure
-              routes:
-                - match: Host(\`bcshowcase-api.dev.nborbit.ca\`)
-                  kind: Rule
-                  services:
-                    - name: bc-wallet-bc-wallet-api-server
-                      port: 3000
-              tls:
-                secretName: bc-wallet-tls
-            EOF
-            
-            # Create Traefik IngressRoute for Traction Adapter
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: traefik.containo.us/v1alpha1
-            kind: IngressRoute
-            metadata:
-              name: traction-adapter-route
-            spec:
-              entryPoints:
-                - websecure
-              routes:
-                - match: Host(\`bcshowcase-traction.dev.nborbit.ca\`)
-                  kind: Rule
-                  services:
-                    - name: bc-wallet-bc-wallet-traction-adapter
-                      port: 3000
-              tls:
-                secretName: bc-wallet-tls
-            EOF
-            
-            # Create Traefik IngressRoute for Showcase Creator
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: traefik.containo.us/v1alpha1
-            kind: IngressRoute
-            metadata:
-              name: showcase-creator-route
-            spec:
-              entryPoints:
-                - websecure
-              routes:
-                - match: Host(\`bcshowcase-ui.dev.nborbit.ca\`)
-                  kind: Rule
-                  services:
-                    - name: bc-wallet-bc-wallet-showcase-creator
-                      port: 3050
-              tls:
-                secretName: bc-wallet-tls
-            EOF
-            
-            # Create Traefik IngressRoute for Demo Web
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: traefik.containo.us/v1alpha1
-            kind: IngressRoute
-            metadata:
-              name: demo-web-route
-            spec:
-              entryPoints:
-                - websecure
-              routes:
-                - match: Host(\`bcshowcase-demo-web.dev.nborbit.ca\`)
-                  kind: Rule
-                  services:
-                    - name: bc-wallet-bc-wallet-demo-web
-                      port: 80
-              tls:
-                secretName: bc-wallet-tls
-            EOF
-            
-            # Create Traefik IngressRoute for Demo Server
-            cat <<EOF | sudo kubectl apply -f -
-            apiVersion: traefik.containo.us/v1alpha1
-            kind: IngressRoute
-            metadata:
-              name: demo-server-route
-            spec:
-              entryPoints:
-                - websecure
-              routes:
-                - match: Host(\`bcshowcase-demo-server.dev.nborbit.ca\`)
-                  kind: Rule
-                  services:
-                    - name: bc-wallet-bc-wallet-demo-server
-                      port: 3000
-              tls:
-                secretName: bc-wallet-tls
-            EOF
             
             # Clean up
             rm -rf /home/ubuntu/pipeline/charts
@@ -327,11 +204,11 @@ jobs:
           username: ${{ secrets.K3S_USERNAME }}
           key: ${{ secrets.K3S_SSH_KEY }}
           script: |
-            sudo kubectl rollout restart deployment bc-wallet-bc-wallet-api-server
-            sudo kubectl rollout restart deployment bc-wallet-bc-wallet-traction-adapter
-            sudo kubectl rollout restart deployment bc-wallet-bc-wallet-showcase-creator
-            sudo kubectl rollout restart deployment bc-wallet-bc-wallet-demo-web
-            sudo kubectl rollout restart deployment bc-wallet-bc-wallet-demo-server
+            sudo kubectl rollout restart deployment bc-wallet-demo-bc-wallet-api-server
+            sudo kubectl rollout restart deployment bc-wallet-demo-bc-wallet-traction-adapter
+            sudo kubectl rollout restart deployment bc-wallet-demo-bc-wallet-showcase-creator
+            sudo kubectl rollout restart deployment bc-wallet-demo-bc-wallet-demo-web
+            sudo kubectl rollout restart deployment bc-wallet-demo-bc-wallet-demo-server
 
   # deploy_uat:
   #   name: Deploy to UAT

@@ -1,82 +1,118 @@
-{{- if .Values.api_server.enabled }}
+{{- if .Values.apiServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.api_server.name }}
+  name: {{ include "bc-wallet.fullname" . }}-api-server
   namespace: {{ .Values.global.namespaceOverride | default .Release.Namespace }}
   labels:
-    app.kubernetes.io/component: api
+    app.kubernetes.io/component: api-server
     app.kubernetes.io/part-of: bc-wallet
     {{- include "bc-wallet.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.api_server.replicaCount }}
+  {{- if not .Values.apiServer.autoscaling.enabled }}
+  replicas: {{ .Values.apiServer.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-{{ .Values.api_server.name }}
+      app.kubernetes.io/component: api-server
+      {{- include "bc-wallet.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels:
-        app: {{ .Release.Name }}-{{ .Values.api_server.name }}
-        app.kubernetes.io/component: api
-        app.kubernetes.io/part-of: bc-wallet
-        {{- include "bc-wallet.labels" . | nindent 8 }}
-      {{- with .Values.api_server.podAnnotations }}
+      {{- with .Values.apiServer.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        app.kubernetes.io/component: api-server
+        {{- include "bc-wallet.labels" . | nindent 8 }}
+        {{- with .Values.apiServer.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
-      {{- with .Values.api_server.podSecurityContext }}
+      {{- with .Values.apiServer.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ if .Values.apiServer.serviceAccount.create }}{{ if .Values.apiServer.serviceAccount.name }}{{ .Values.apiServer.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.apiServer.name }}{{ end }}{{ end }}
+      {{- with .Values.apiServer.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z {{ .Release.Name }}-postgresql {{ .Values.postgresql.primary.service.ports.postgresql | quote }}; do echo waiting for postgres; sleep 2; done; sleep 2;']
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z {{ .Release.Name }}-rabbitmq {{ .Values.rabbitmq.service.ports.amqp | quote }}; do echo waiting for rabbitmq; sleep 2; done; sleep 5;']
       containers:
-      - name: {{ .Values.api_server.name }}
-        image: "{{ .Values.api_server.image.repository }}:{{ .Values.api_server.image.tag }}"
-        imagePullPolicy: {{ .Values.api_server.image.pullPolicy }}
-        {{- with .Values.api_server.containerSecurityContext }}
-        securityContext:
-          {{- toYaml . | nindent 12 }}
-        {{- end }}
-        ports:
-        - containerPort: {{ .Values.api_server.port }}
-          name: http
-        env:
-        - name: AMQ_HOST
-          value: {{.Release.Name}}-rabbitmq
-        - name: AMQ_PORT
-          value: {{ .Values.rabbitmq.port | quote }}
-        - name: AMQ_TRANSPORT
-          value: tcp
-        - name: AMQ_USERNAME
-          value: {{ .Values.rabbitmq.auth.username | quote }}
-        - name: AMQ_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.rabbitmq.secretName" . }}
-              key: {{ include "bc-wallet.rabbitmq.passwordKey" . }}
-        - name: SHOWCASE_DB_HOST
-          value: {{ .Release.Name }}-postgresql
-        {{- range $key, $value := .Values.api_server.env }}
-        {{- if and (ne $key "SHOWCASE_DB_HOST") (kindIs "map" $value) }}
-        - name: {{ $key }}
-          valueFrom:
-            {{- toYaml $value | nindent 12 }}
-        {{- else if ne $key "SHOWCASE_DB_HOST" }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        {{- end }}
-        - name: SHOWCASE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.database.secret.name" . }}
-              key: {{ include "bc-wallet.database.userPasswordKey" . }}
-        - name: AUTH_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.authtoken.secret.name" . }}
-              key: token
-        resources:
-          {{- toYaml .Values.api_server.resources | nindent 12 }}
-      serviceAccountName: {{ if .Values.api_server.serviceAccount.create }}{{ if .Values.api_server.serviceAccount.name }}{{ .Values.api_server.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.api_server.name }}{{ end }}{{ end }}
+        - name: api-server
+          {{- with .Values.apiServer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.apiServer.image.repository }}:{{ .Values.apiServer.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.apiServer.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.apiServer.port }}
+              protocol: TCP
+          env:
+            - name: API_DB_HOST
+              value: {{ .Release.Name }}-postgresql
+            - name: API_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.database.secret.name" . }}
+                  key: {{ include "bc-wallet.database.userPasswordKey" . }}
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
+                  key: token
+            - name: NEXT_PUBLIC_API_URL
+              value: {{ .Values.apiServer.env.NEXT_PUBLIC_API_URL | quote }}
+            - name: NEXT_PUBLIC_SHOWCASE_API_URL
+              value: {{ .Values.apiServer.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
+            - name: NEXT_AUTH_SECRET
+              value: {{ .Values.apiServer.env.NEXT_AUTH_SECRET | quote }}
+            - name: OIDC_DEFAULT_TENANT
+              value: {{ .Values.apiServer.env.OIDC_DEFAULT_TENANT | quote }}
+            - name: OIDC_TRUST_HOST
+              value: {{ .Values.apiServer.env.OIDC_TRUST_HOST | quote }}
+            - name: OIDC_AUTH_URL
+              value: {{ .Values.apiServer.env.OIDC_AUTH_URL | quote }}
+          {{- include "bc-wallet.renderEnvFrom" (list "apiServer" .) | nindent 10 }}
+          {{- with .Values.apiServer.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiServer.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiServer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiServer.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.apiServer.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiServer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiServer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiServer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}

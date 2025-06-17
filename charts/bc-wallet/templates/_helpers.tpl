@@ -40,6 +40,7 @@ helm.sh/chart: {{ include "bc-wallet.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: {{ .Release.Name }}
 {{- end }}
 
 {{/*
@@ -51,19 +52,35 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Returns a secret if it already exists in Kubernetes, otherwise creates
-it randomly.
+Render envFrom from either service or global scope
 */}}
-{{- define "getOrGeneratePass" -}}
-{{- $len := (default 16 .Length) | int -}}
-{{- $obj := (lookup "v1" .Kind .Namespace .Name).data -}}
-{{- if $obj }}
-{{- index $obj .Key -}}
-{{- else if (eq (lower .Kind) "secret") -}}
-{{- randAlphaNum $len | b64enc -}}
-{{- else -}}
-{{- randAlphaNum $len -}}
-{{- end -}}
+{{- define "bc-wallet.renderEnvFrom" -}}
+{{- $service := index . 0 -}}
+{{- $ctx := index . 1 -}}
+{{- $cm := default (get $ctx.Values.global "extraEnvVarsCM") (get $ctx.Values $service).extraEnvVarsCM }}
+{{- $secret := default (get $ctx.Values.global "extraEnvVarsSecret") (get $ctx.Values $service).extraEnvVarsSecret }}
+{{- if or $cm $secret }}
+envFrom:
+  {{- if $cm }}
+  - configMapRef:
+      name: {{ $cm | quote }}
+  {{- end }}
+  {{- if $secret }}
+  - secretRef:
+      name: {{ $secret | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "bc-wallet.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "bc-wallet.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -78,6 +95,46 @@ Define database secret name - used to reference PostgreSQL generated secret
 {{- end -}}
 
 {{/*
+Define database user password key - used to reference PostgreSQL generated secret
+*/}}
+{{- define "bc-wallet.database.userPasswordKey" -}}
+{{- if .Values.postgresql.auth.secretKeys.userPasswordKey -}}
+{{- printf "%s" .Values.postgresql.auth.secretKeys.userPasswordKey -}}
+{{- else -}}
+password
+{{- end -}}
+{{- end -}}
+
+{{/*
+Define rabbitmq secret name - used to reference RabbitMQ generated secret
+*/}}
+{{- define "bc-wallet.rabbitmq.secret.name" -}}
+{{- if .Values.rabbitmq.auth.existingPasswordSecret -}}
+    {{- .Values.rabbitmq.auth.existingPasswordSecret -}}
+{{- else -}}
+    {{- printf "%s-rabbitmq" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the RabbitMQ password key
+*/}}
+{{- define "bc-wallet.rabbitmq.passwordKey" -}}
+{{- if .Values.rabbitmq.auth.existingSecretKey -}}
+{{- .Values.rabbitmq.auth.existingSecretKey -}}
+{{- else -}}
+{{- "rabbitmq-password" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Define auth token secret name
+*/}}
+{{- define "bc-wallet.authtoken.secret.name" -}}
+{{- printf "%s-auth-token" .Release.Name -}}
+{{- end -}}
+
+{{/*
 Get the admin-password key.
 */}}
 {{- define "bc-wallet.database.adminPasswordKey" -}}
@@ -85,35 +142,6 @@ Get the admin-password key.
     {{- printf "%s" (tpl .Values.postgresql.auth.secretKeys.adminPasswordKey $) -}}
 {{- else -}}
     {{- printf "postgres-password" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Get the user-password key.
-*/}}
-{{- define "bc-wallet.database.userPasswordKey" -}}
-{{- if .Values.postgresql.auth.secretKeys.userPasswordKey -}}
-    {{- printf "%s" (tpl .Values.postgresql.auth.secretKeys.userPasswordKey $) -}}
-{{- else -}}
-    {{- printf "password" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified rabbitmq name.
-*/}}
-{{- define "bc-wallet.rabbitmq.secret.name" -}}
-{{- printf "%s-rabbitmq" .Release.Name -}}
-{{- end -}}
-
-{{/*
-Get the password key to be retrieved from RabbitMQ secret.
-*/}}
-{{- define "bc-wallet.rabbitmq.passwordKey" -}}
-{{- if .Values.rabbitmq.auth.existingSecretKey -}}
-    {{- .Values.rabbitmq.auth.existingSecretKey -}}
-{{- else -}}
-    {{- print "rabbitmq-password" -}}
 {{- end -}}
 {{- end -}}
 
@@ -158,13 +186,6 @@ Get the rabbitmq erlang cookie key.
 {{- else -}}
 rabbitmq-erlang-cookie
 {{- end -}}
-{{- end -}}
-
-{{/*
-Define a FIXED auth token secret name that can be shared between frontend and backend
-*/}}
-{{- define "bc-wallet.authtoken.secret.name" -}}
-bc-wallet-authtoken
 {{- end -}}
 
 {{/* 

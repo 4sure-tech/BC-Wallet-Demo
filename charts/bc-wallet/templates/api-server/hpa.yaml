@@ -1,32 +1,38 @@
-{{- if .Values.api_server.enabled }}
-{{- if .Values.api_server.autoscaling.enabled }}
+{{- if .Values.apiServer.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.api_server.name }}
-  namespace: {{ .Values.global.namespaceOverride | default .Release.Namespace }}
+  name: {{ include "bc-wallet.fullname" . }}-api-server
+  labels:
+    app.kubernetes.io/component: api-server
+    {{- include "bc-wallet.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}-{{ .Values.api_server.name }}
-  minReplicas: {{ .Values.api_server.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.api_server.autoscaling.maxReplicas }}
+    name: {{ include "bc-wallet.fullname" . }}-api-server
+  minReplicas: {{ .Values.apiServer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.apiServer.autoscaling.maxReplicas }}
   metrics:
+    {{- if .Values.apiServer.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.api_server.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.apiServer.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.apiServer.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.api_server.autoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ .Values.apiServer.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: {{ .Values.api_server.autoscaling.stabilizationWindowSeconds }}
-{{- end }}
+      stabilizationWindowSeconds: {{ .Values.apiServer.autoscaling.stabilizationWindowSeconds }}
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.apiServer.autoscaling.stabilizationWindowSeconds }}
 {{- end }}

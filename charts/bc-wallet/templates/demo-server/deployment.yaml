@@ -1,69 +1,109 @@
-{{- if .Values.demo_server.enabled }}
+{{- if .Values.demoServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.demo_server.name }}
+  name: {{ include "bc-wallet.fullname" . }}-demo-server
   namespace: {{ .Values.global.namespaceOverride | default .Release.Namespace }}
   labels:
-    app.kubernetes.io/component: server
+    app.kubernetes.io/component: demo-server
     app.kubernetes.io/part-of: bc-wallet
     {{- include "bc-wallet.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.demo_server.replicaCount }}
+  replicas: {{ .Values.demoServer.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-{{ .Values.demo_server.name }}
+      app.kubernetes.io/component: demo-server
+      {{- include "bc-wallet.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels:
-        app: {{ .Release.Name }}-{{ .Values.demo_server.name }}
-        app.kubernetes.io/component: server
-        app.kubernetes.io/part-of: bc-wallet
-        {{- include "bc-wallet.labels" . | nindent 8 }}
-      {{- with .Values.demo_server.podAnnotations }}
+      {{- with .Values.demoServer.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        app.kubernetes.io/component: demo-server
+        {{- include "bc-wallet.labels" . | nindent 8 }}
+        {{- with .Values.demoServer.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
-      {{- with .Values.demo_server.podSecurityContext }}
+      {{- with .Values.demoServer.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ if .Values.demoServer.serviceAccount.create }}{{ if .Values.demoServer.serviceAccount.name }}{{ .Values.demoServer.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.demoServer.name }}{{ end }}{{ end }}
+      {{- with .Values.demoServer.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: {{ .Values.demo_server.name }}
-        image: "{{ .Values.demo_server.image.repository }}:{{ .Values.demo_server.image.tag }}"
-        imagePullPolicy: {{ .Values.demo_server.image.pullPolicy }}
-        {{- with .Values.demo_server.containerSecurityContext }}
-        securityContext:
-          {{- toYaml . | nindent 12 }}
-        {{- end }}
-        ports:
-        - containerPort: {{ .Values.demo_server.port }}
-          name: http
-        env:
-        - name: SHOWCASE_DB_HOST
-          value: {{ .Release.Name }}-postgresql
-        {{- range $key, $value := .Values.demo_server.env }}
-        {{- if and (ne $key "SHOWCASE_DB_HOST") (kindIs "map" $value) }}
-        - name: {{ $key }}
-          valueFrom:
-            {{- toYaml $value | nindent 12 }}
-        {{- else if ne $key "SHOWCASE_DB_HOST" }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        {{- end }}
-        - name: SHOWCASE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.database.secret.name" . }}
-              key: {{ include "bc-wallet.database.userPasswordKey" . }}
-        - name: AUTH_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.authtoken.secret.name" . }}
-              key: token
-        resources:
-          {{- toYaml .Values.demo_server.resources | nindent 12 }}
-      serviceAccountName: {{ if .Values.demo_server.serviceAccount.create }}{{ if .Values.demo_server.serviceAccount.name }}{{ .Values.demo_server.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.demo_server.name }}{{ end }}{{ end }}
+        - name: demo-server
+          {{- with .Values.demoServer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.demoServer.image.repository }}:{{ .Values.demoServer.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.demoServer.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.demoServer.port }}
+              protocol: TCP
+          env:
+            - name: API_DB_HOST
+              value: {{ .Release.Name }}-postgresql
+            - name: API_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.database.secret.name" . }}
+                  key: {{ include "bc-wallet.database.userPasswordKey" . }}
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
+                  key: token
+            - name: NEXT_PUBLIC_API_URL
+              value: {{ .Values.demoServer.env.NEXT_PUBLIC_API_URL | quote }}
+            - name: NEXT_PUBLIC_SHOWCASE_API_URL
+              value: {{ .Values.demoServer.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
+            - name: NEXT_AUTH_SECRET
+              value: {{ .Values.demoServer.env.NEXT_AUTH_SECRET | quote }}
+            - name: OIDC_DEFAULT_TENANT
+              value: {{ .Values.demoServer.env.OIDC_DEFAULT_TENANT | quote }}
+            - name: OIDC_TRUST_HOST
+              value: {{ .Values.demoServer.env.OIDC_TRUST_HOST | quote }}
+            - name: OIDC_AUTH_URL
+              value: {{ .Values.demoServer.env.OIDC_AUTH_URL | quote }}
+          {{- include "bc-wallet.renderEnvFrom" (list "demoServer" .) | nindent 10 }}
+          {{- with .Values.demoServer.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.demoServer.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.demoServer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.demoServer.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.demoServer.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.demoServer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.demoServer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.demoServer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }} 

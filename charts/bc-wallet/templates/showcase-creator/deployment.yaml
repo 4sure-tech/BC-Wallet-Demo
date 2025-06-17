@@ -1,69 +1,109 @@
-{{- if .Values.showcase_creator.enabled }}
+{{- if .Values.showcaseCreator.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.showcase_creator.name }}
+  name: {{ include "bc-wallet.fullname" . }}-showcase-creator
   namespace: {{ .Values.global.namespaceOverride | default .Release.Namespace }}
   labels:
-    app.kubernetes.io/component: creator
+    app.kubernetes.io/component: showcase-creator
     app.kubernetes.io/part-of: bc-wallet
     {{- include "bc-wallet.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.showcase_creator.replicaCount }}
+  replicas: {{ .Values.showcaseCreator.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-{{ .Values.showcase_creator.name }}
+      app.kubernetes.io/component: showcase-creator
+      {{- include "bc-wallet.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels:
-        app: {{ .Release.Name }}-{{ .Values.showcase_creator.name }}
-        app.kubernetes.io/component: creator
-        app.kubernetes.io/part-of: bc-wallet
-        {{- include "bc-wallet.labels" . | nindent 8 }}
-      {{- with .Values.showcase_creator.podAnnotations }}
+      {{- with .Values.showcaseCreator.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        app.kubernetes.io/component: showcase-creator
+        {{- include "bc-wallet.labels" . | nindent 8 }}
+        {{- with .Values.showcaseCreator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
-      {{- with .Values.showcase_creator.podSecurityContext }}
+      {{- with .Values.showcaseCreator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ if .Values.showcaseCreator.serviceAccount.create }}{{ if .Values.showcaseCreator.serviceAccount.name }}{{ .Values.showcaseCreator.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.showcaseCreator.name }}{{ end }}{{ end }}
+      {{- with .Values.showcaseCreator.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: {{ .Values.showcase_creator.name }}
-        image: "{{ .Values.showcase_creator.image.repository }}:{{ .Values.showcase_creator.image.tag }}"
-        imagePullPolicy: {{ .Values.showcase_creator.image.pullPolicy }}
-        {{- with .Values.showcase_creator.containerSecurityContext }}
-        securityContext:
-          {{- toYaml . | nindent 12 }}
-        {{- end }}
-        ports:
-        - containerPort: {{ .Values.showcase_creator.port }}
-          name: http
-        env:
-        - name: SHOWCASE_DB_HOST
-          value: {{ .Release.Name }}-postgresql
-        {{- range $key, $value := .Values.showcase_creator.env }}
-        {{- if and (ne $key "SHOWCASE_DB_HOST") (kindIs "map" $value) }}
-        - name: {{ $key }}
-          valueFrom:
-            {{- toYaml $value | nindent 12 }}
-        {{- else if ne $key "SHOWCASE_DB_HOST" }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        {{- end }}
-        - name: SHOWCASE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.database.secret.name" . }}
-              key: {{ include "bc-wallet.database.userPasswordKey" . }}
-        - name: AUTH_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bc-wallet.authtoken.secret.name" . }}
-              key: token
-        resources:
-          {{- toYaml .Values.showcase_creator.resources | nindent 12 }}
-      serviceAccountName: {{ if .Values.showcase_creator.serviceAccount.create }}{{ if .Values.showcase_creator.serviceAccount.name }}{{ .Values.showcase_creator.serviceAccount.name }}{{ else }}{{ $.Release.Name }}-{{ .Values.showcase_creator.name }}{{ end }}{{ end }}
+        - name: showcase-creator
+          {{- with .Values.showcaseCreator.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.showcaseCreator.image.repository }}:{{ .Values.showcaseCreator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.showcaseCreator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.showcaseCreator.port }}
+              protocol: TCP
+          env:
+            - name: SHOWCASE_DB_HOST
+              value: {{ .Release.Name }}-postgresql
+            - name: SHOWCASE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.database.secret.name" . }}
+                  key: {{ include "bc-wallet.database.userPasswordKey" . }}
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
+                  key: token
+            - name: NEXT_PUBLIC_WALLET_URL
+              value: {{ .Values.showcaseCreator.env.NEXT_PUBLIC_WALLET_URL | quote }}
+            - name: NEXT_PUBLIC_SHOWCASE_API_URL
+              value: {{ .Values.showcaseCreator.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
+            - name: NEXT_AUTH_SECRET
+              value: {{ .Values.showcaseCreator.env.NEXT_AUTH_SECRET | quote }}
+            - name: OIDC_DEFAULT_TENANT
+              value: {{ .Values.showcaseCreator.env.OIDC_DEFAULT_TENANT | quote }}
+            - name: OIDC_TRUST_HOST
+              value: {{ .Values.showcaseCreator.env.OIDC_TRUST_HOST | quote }}
+            - name: OIDC_AUTH_URL
+              value: {{ .Values.showcaseCreator.env.OIDC_AUTH_URL | quote }}
+          {{- include "bc-wallet.renderEnvFrom" (list "showcaseCreator" .) | nindent 10 }}
+          {{- with .Values.showcaseCreator.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.showcaseCreator.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.showcaseCreator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.showcaseCreator.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.showcaseCreator.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.showcaseCreator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.showcaseCreator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.showcaseCreator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }} 
