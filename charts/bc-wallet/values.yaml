@@ -20,27 +20,27 @@ ingress:
     - host: api.bc-wallet-demo.dev.nborbit.ca
       paths:
         - path: /
-          service: bc-wallet-api-server
+          service: bc-wallet-demo-api-server
           port: 3000
     - host: traction.bc-wallet-demo.dev.nborbit.ca
       paths:  
         - path: /
-          service: bc-wallet-traction-adapter
+          service: bc-wallet-demo-traction-adapter
           port: 3000
     - host: showcase.bc-wallet-demo.dev.nborbit.ca
       paths:
         - path: /
-          service: bc-wallet-showcase-creator
+          service: bc-wallet-demo-showcase-creator
           port: 3050
     - host: demo-web.bc-wallet-demo.dev.nborbit.ca
       paths:
         - path: /
-          service: bc-wallet-demo-web
+          service: bc-wallet-demo-demo-web
           port: 80
     - host: demo-server.bc-wallet-demo.dev.nborbit.ca
       paths:
         - path: /
-          service: bc-wallet-demo-server
+          service: bc-wallet-demo-demo-server
           port: 3000
   tls:
     - secretName: bc-wallet-tls
