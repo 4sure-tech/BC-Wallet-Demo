@@ -178,7 +178,7 @@ jobs:
             # Update dependencies and deploy with Helm
             helm dependency update
             
-            helm upgrade --install bc-wallet-demo --namespace testing \
+            helm upgrade --install bc-wallet-demo --namespace development \
               --set global.extraEnvVarsSecret=bc-wallet-secrets \
               --set apiServer.image.tag=${{ needs.build_api_server.outputs.image_tag }} \
               --set tractionAdapter.image.tag=${{ needs.build_traction_adapter.outputs.image_tag }} \
