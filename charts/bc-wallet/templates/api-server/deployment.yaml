@@ -58,30 +58,32 @@ spec:
               containerPort: {{ .Values.apiServer.port }}
               protocol: TCP
           env:
-            - name: API_DB_HOST
+            - name: AMQ_HOST
+              value: {{.Release.Name}}-rabbitmq
+            - name: AMQ_PORT
+              value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
+            - name: AMQ_TRANSPORT
+              value: tcp
+            - name: AMQ_USERNAME
+              value: {{ .Values.rabbitmq.auth.username | quote }}
+            - name: AMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bc-wallet.rabbitmq.secret.name" . }}
+                  key: {{ include "bc-wallet.rabbitmq.passwordKey" . }}
+            - name: SHOWCASE_DB_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: SHOWCASE_DB_USERNAME
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: SHOWCASE_DB_NAME
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: SHOWCASE_DB_HOST
               value: {{ .Release.Name }}-postgresql
-            - name: API_DB_PASSWORD
+            - name: SHOWCASE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "bc-wallet.database.secret.name" . }}
                   key: {{ include "bc-wallet.database.userPasswordKey" . }}
-            - name: AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
-                  key: token
-            - name: NEXT_PUBLIC_API_URL
-              value: {{ .Values.apiServer.env.NEXT_PUBLIC_API_URL | quote }}
-            - name: NEXT_PUBLIC_SHOWCASE_API_URL
-              value: {{ .Values.apiServer.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
-            - name: NEXT_AUTH_SECRET
-              value: {{ .Values.apiServer.env.NEXT_AUTH_SECRET | quote }}
-            - name: OIDC_DEFAULT_TENANT
-              value: {{ .Values.apiServer.env.OIDC_DEFAULT_TENANT | quote }}
-            - name: OIDC_TRUST_HOST
-              value: {{ .Values.apiServer.env.OIDC_TRUST_HOST | quote }}
-            - name: OIDC_AUTH_URL
-              value: {{ .Values.apiServer.env.OIDC_AUTH_URL | quote }}
           {{- include "bc-wallet.renderEnvFrom" (list "apiServer" .) | nindent 10 }}
           {{- with .Values.apiServer.livenessProbe }}
           livenessProbe:

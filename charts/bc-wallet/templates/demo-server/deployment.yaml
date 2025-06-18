@@ -49,30 +49,25 @@ spec:
               containerPort: {{ .Values.demoServer.port }}
               protocol: TCP
           env:
-            - name: API_DB_HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: API_DB_PASSWORD
+            - name: CORS_ALLOW_CREDENTIALS
+              value: "true"
+            - name: CORS_DISABLED
+              value: "true"
+            - name: CORS_ALLOW_HEADERS
+              value: "Content-Type, Authorization"
+            - name: CORS_ALLOW_METHODS
+              value: "GET, POST, PUT, DELETE, OPTIONS"
+            - name: CORS_ALLOW_ORIGINS
+              value: "https://{{ include "bc-wallet.showcaseCreator.host" . }},https://{{ include "bc-wallet.demoWeb.host" . }}"
+            - name: SHOWCASE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "bc-wallet.database.secret.name" . }}
                   key: {{ include "bc-wallet.database.userPasswordKey" . }}
-            - name: AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.authtoken.secret.name" . }}
-                  key: token
-            - name: NEXT_PUBLIC_API_URL
-              value: {{ .Values.demoServer.env.NEXT_PUBLIC_API_URL | quote }}
-            - name: NEXT_PUBLIC_SHOWCASE_API_URL
-              value: {{ .Values.demoServer.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
-            - name: NEXT_AUTH_SECRET
-              value: {{ .Values.demoServer.env.NEXT_AUTH_SECRET | quote }}
-            - name: OIDC_DEFAULT_TENANT
-              value: {{ .Values.demoServer.env.OIDC_DEFAULT_TENANT | quote }}
-            - name: OIDC_TRUST_HOST
-              value: {{ .Values.demoServer.env.OIDC_TRUST_HOST | quote }}
-            - name: OIDC_AUTH_URL
-              value: {{ .Values.demoServer.env.OIDC_AUTH_URL | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.demoServer.logLevel | quote }}
+            - name: BASE_ROUTE
+              value: {{ .Values.demoWeb.baseRoute | quote }}
           {{- include "bc-wallet.renderEnvFrom" (list "demoServer" .) | nindent 10 }}
           {{- with .Values.demoServer.livenessProbe }}
           livenessProbe:

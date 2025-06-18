@@ -49,18 +49,16 @@ spec:
               containerPort: {{ .Values.demoWeb.port }}
               protocol: TCP
           env:
-            - name: NEXT_PUBLIC_API_URL
-              value: {{ .Values.demoWeb.env.NEXT_PUBLIC_API_URL | quote }}
-            - name: NEXT_PUBLIC_SHOWCASE_API_URL
-              value: {{ .Values.demoWeb.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
-            - name: NEXT_AUTH_SECRET
-              value: {{ .Values.demoWeb.env.NEXT_AUTH_SECRET | quote }}
-            - name: OIDC_DEFAULT_TENANT
-              value: {{ .Values.demoWeb.env.OIDC_DEFAULT_TENANT | quote }}
-            - name: OIDC_TRUST_HOST
-              value: {{ .Values.demoWeb.env.OIDC_TRUST_HOST | quote }}
-            - name: OIDC_AUTH_URL
-              value: {{ .Values.demoWeb.env.OIDC_AUTH_URL | quote }}
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: {{ .Values.demoWeb.logLevel | quote }}
+            - name: REACT_APP_BASE_ROUTE
+              value: {{ .Values.demoWeb.baseRoute | quote }}
+            - name: DEMOWEB_SNOWPLOW_ENDPOINT
+              value: {{ .Values.demoWeb.snowplowEndpoint | quote }}
+            - name: DEMOWEB_INSIGHTS_PROJECT_ID
+              value: {{ .Values.demoWeb.insightsProjectId | quote }}
           {{- include "bc-wallet.renderEnvFrom" (list "demoWeb" .) | nindent 10 }}
           {{- with .Values.demoWeb.livenessProbe }}
           livenessProbe:

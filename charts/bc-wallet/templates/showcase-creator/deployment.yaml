@@ -49,25 +49,18 @@ spec:
               containerPort: {{ .Values.showcaseCreator.port }}
               protocol: TCP
           env:
-            - name: SHOWCASE_DB_HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: SHOWCASE_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.database.secret.name" . }}
-                  key: {{ include "bc-wallet.database.userPasswordKey" . }}
             - name: NEXT_PUBLIC_WALLET_URL
-              value: {{ .Values.showcaseCreator.env.NEXT_PUBLIC_WALLET_URL | quote }}
+              value: "https://{{ include "bc-wallet.demoWeb.host" . }}/digital-trust/showcase"
             - name: NEXT_PUBLIC_SHOWCASE_API_URL
-              value: {{ .Values.showcaseCreator.env.NEXT_PUBLIC_SHOWCASE_API_URL | quote }}
-            - name: NEXT_AUTH_SECRET
-              value: {{ .Values.showcaseCreator.env.NEXT_AUTH_SECRET | quote }}
-            - name: OIDC_DEFAULT_TENANT
-              value: {{ .Values.showcaseCreator.env.OIDC_DEFAULT_TENANT | quote }}
-            - name: OIDC_TRUST_HOST
-              value: {{ .Values.showcaseCreator.env.OIDC_TRUST_HOST | quote }}
+              value: "https://{{ include "bc-wallet.apiServer.host" . }}"
+            - name: OIDC_REDIRECT_PROXY_URL
+              value: "https://{{ include "bc-wallet.showcaseCreator.host" . }}/api/auth"
             - name: OIDC_AUTH_URL
-              value: {{ .Values.showcaseCreator.env.OIDC_AUTH_URL | quote }}
+              value: "https://{{ include "bc-wallet.showcaseCreator.host" . }}"
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: {{ .Values.showcaseCreator.service.port | quote }}
           {{- include "bc-wallet.renderEnvFrom" (list "showcaseCreator" .) | nindent 10 }}
           {{- with .Values.showcaseCreator.livenessProbe }}
           livenessProbe:
