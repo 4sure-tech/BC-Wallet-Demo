@@ -48,18 +48,6 @@ spec:
             - name: http
               containerPort: {{ .Values.demoWeb.port }}
               protocol: TCP
-          env:
-            - name: NODE_ENV
-              value: production
-            - name: LOG_LEVEL
-              value: {{ .Values.demoWeb.logLevel | quote }}
-            - name: REACT_APP_BASE_ROUTE
-              value: {{ .Values.demoWeb.baseRoute | quote }}
-            - name: DEMOWEB_SNOWPLOW_ENDPOINT
-              value: {{ .Values.demoWeb.snowplowEndpoint | quote }}
-            - name: DEMOWEB_INSIGHTS_PROJECT_ID
-              value: {{ .Values.demoWeb.insightsProjectId | quote }}
-          {{- include "bc-wallet.renderEnvFrom" (list "demoWeb" .) | nindent 10 }}
           {{- with .Values.demoWeb.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

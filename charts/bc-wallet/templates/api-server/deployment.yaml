@@ -57,34 +57,6 @@ spec:
             - name: http
               containerPort: {{ .Values.apiServer.port }}
               protocol: TCP
-          env:
-            - name: AMQ_HOST
-              value: {{.Release.Name}}-rabbitmq
-            - name: AMQ_PORT
-              value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
-            - name: AMQ_TRANSPORT
-              value: tcp
-            - name: AMQ_USERNAME
-              value: {{ .Values.rabbitmq.auth.username | quote }}
-            - name: AMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.rabbitmq.secret.name" . }}
-                  key: {{ include "bc-wallet.rabbitmq.passwordKey" . }}
-            - name: SHOWCASE_DB_PORT
-              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
-            - name: SHOWCASE_DB_USERNAME
-              value: {{ .Values.postgresql.auth.username | quote }}
-            - name: SHOWCASE_DB_NAME
-              value: {{ .Values.postgresql.auth.database | quote }}
-            - name: SHOWCASE_DB_HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: SHOWCASE_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bc-wallet.database.secret.name" . }}
-                  key: {{ include "bc-wallet.database.userPasswordKey" . }}
-          {{- include "bc-wallet.renderEnvFrom" (list "apiServer" .) | nindent 10 }}
           {{- with .Values.apiServer.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

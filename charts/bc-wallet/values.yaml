@@ -83,14 +83,43 @@ apiServer:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  # Environment variables
+  # Environment variables - synced with docker-compose.yml
   env:
-    NEXT_PUBLIC_API_URL: "http://api.bc-wallet-demo.dev.nborbit.ca"
-    NEXT_PUBLIC_SHOWCASE_API_URL: "http://showcase.bc-wallet-demo.dev.nborbit.ca"
-    NEXT_AUTH_SECRET: "your-auth-secret"
-    OIDC_DEFAULT_TENANT: "your-tenant"
-    OIDC_TRUST_HOST: "true"
-    OIDC_AUTH_URL: "http://keycloak:8080/auth"
+    # Port
+    PORT: "5005"
+    
+    # Database configuration
+    SHOWCASE_DB_HOST: "bc-wallet-demo-postgresql"
+    SHOWCASE_DB_PORT: "5432"
+    SHOWCASE_DB_USERNAME: "postgres"
+    SHOWCASE_DB_NAME: "bcwallet"
+    # SHOWCASE_DB_PASSWORD: from secret
+    
+    # Logging
+    LOG_LEVEL: "debug"
+    
+    # CORS settings
+    CORS_DISABLED: "false"
+    CORS_ALLOW_ORIGINS: "*"
+    CORS_ALLOW_METHODS: "GET,HEAD,PUT,PATCH,POST,DELETE"
+    CORS_ALLOW_HEADERS: "*"
+    CORS_ALLOW_CREDENTIALS: "true"
+    
+    # Message broker settings
+    TRACTION_ADAPTER_MESSAGE_TOPIC: "showcase-cmd"
+    AMQ_HOST: "bc-wallet-demo-rabbitmq"
+    AMQ_PORT: "5672"
+    AMQ_USERNAME: "user"
+    AMQ_TRANSPORT: "tcp"
+    # AMQ_PASSWORD: from secret
+    
+    # Encryption
+    # ENCRYPTION_KEY: from secret
+    
+    # OIDC Authentication
+    # OIDC_ROOT_ISSUER_URL: from secret
+    # OIDC_ROOT_CLIENT_ID: from secret
+    # OIDC_ROOT_CLIENT_SECRET: from secret
 
   # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
@@ -176,19 +205,31 @@ demoServer:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  # Environment variables
+  # Environment variables - synced with docker-compose.yml
   env:
-    TENANT_ID: "your-tenant-id"
-    WALLET_ID: "your-wallet-id"
-    API_KEY: "your-api-key"
-    TRACTION_API_URL: "http://traction-api:8032"
-    BASE_ROUTE: "/"
-    TRACTION_WEBHOOK_SECRET: "your-webhook-secret"
+    # Port
+    PORT: "5000"
+    
+    # Logging
+    LOG_LEVEL: "debug"
+    
+    # CORS settings
+    CORS_DISABLED: "false"
+    CORS_ALLOW_ORIGINS: "*"
+    CORS_ALLOW_METHODS: "GET,HEAD,PUT,PATCH,POST,DELETE"
+    CORS_ALLOW_HEADERS: "*"
+    CORS_ALLOW_CREDENTIALS: "true"
+    
+    # Application-specific variables (from secrets)
+    # TENANT_ID: from secret (TRACTION_DEFAULT_TENANT_ID)
+    # WALLET_ID: from secret (TRACTION_DEFAULT_WALLET_ID)
+    # API_KEY: from secret (TRACTION_DEFAULT_API_KEY)
+    # TRACTION_API_URL: from secret
+    # BASE_ROUTE: from secret (DEMOWEB_BASE_ROUTE)
+    # TRACTION_WEBHOOK_SECRET: from secret
 
   # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
-
-  logLevel: debug
 
   # Name of ConfigMap with extra environment variables; overrides global.extraEnvVarsCM if set
   extraEnvVarsCM: ""
@@ -271,14 +312,22 @@ demoWeb:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  # Environment variables
+  # Environment variables - synced with docker-compose.yml
   env:
-    NEXT_PUBLIC_API_URL: "http://api.bc-wallet-demo.dev.nborbit.ca"
-    NEXT_PUBLIC_SHOWCASE_API_URL: "http://showcase.bc-wallet-demo.dev.nborbit.ca"
-    NEXT_AUTH_SECRET: "your-auth-secret"
-    OIDC_DEFAULT_TENANT: "your-tenant"
-    OIDC_TRUST_HOST: "true"
-    OIDC_AUTH_URL: "http://keycloak:8080/auth"
+    # Node environment
+    NODE_ENV: "production"
+    
+    # Logging
+    LOG_LEVEL: "debug"
+    
+    # Application URLs
+    REACT_APP_SHOWCASE_API_URL: "https://api.bc-wallet-demo.dev.nborbit.ca"
+    REACT_APP_DEMO_API_URL: "https://demo-server.bc-wallet-demo.dev.nborbit.ca"
+    REACT_APP_BASE_ROUTE: "/digital-trust/showcase"
+    
+    # Analytics
+    REACT_APP_INSIGHTS_PROJECT_ID: "your-insights-project-id"
+    SNOWPLOW_ENDPOINT: "spm.apps.gov.bc.ca"
 
   # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
@@ -364,22 +413,23 @@ showcaseCreator:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  # Environment variables
+  # Environment variables - synced with docker-compose.yml
   env:
+    # Node environment
+    NODE_ENV: "production"
+    
+    # Port configuration
     PORT: "3050"
-    LOG_LEVEL: "debug"
-    SHOWCASE_DB_HOST: "bc-wallet-demo-postgresql"
-    SHOWCASE_DB_PORT: "5432"
-    SHOWCASE_DB_USERNAME: "postgres"
-    SHOWCASE_DB_PASSWORD: "bitnami"
-    SHOWCASE_DB_NAME: "showcase"
-    TRACTION_ADAPTER_MESSAGE_TOPIC: "showcase-cmd"
-    AMQ_HOST: "bc-wallet-demo-rabbitmq"
-    AMQ_PORT: "5672"
-    AMQ_USERNAME: "user"
-    AMQ_PASSWORD: "bitnami"
-    AMQ_TRANSPORT: "tcp"
-    ENCRYPTION_KEY: "your-encryption-key"
+    
+    # Application URLs
+    NEXT_PUBLIC_SHOWCASE_API_URL: "https://api.bc-wallet-demo.dev.nborbit.ca"
+    NEXT_PUBLIC_WALLET_URL: "https://demo-web.bc-wallet-demo.dev.nborbit.ca/digital-trust/showcase"
+    
+    # Authentication (from secrets)
+    # NEXT_AUTH_SECRET: from secret
+    # OIDC_AUTH_URL: from secret
+    # OIDC_DEFAULT_TENANT: from secret
+    OIDC_TRUST_HOST: "true"
 
   # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
@@ -465,20 +515,31 @@ tractionAdapter:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  # Environment variables
+  # Environment variables - synced with docker-compose.yml
   env:
-    TRACTION_DEFAULT_API_URL: "http://traction-api:8032"
-    FIXED_SHOWCASE_API_URL: "http://bc-wallet-demo-api-server:3000"
+    # Port
+    PORT: "3000"
+    
+    # Logging
+    LOG_LEVEL: "debug"
+    
+    # Message broker settings
     TRACTION_ADAPTER_MESSAGE_TOPIC: "showcase-cmd"
     AMQ_HOST: "bc-wallet-demo-rabbitmq"
     AMQ_PORT: "5672"
     AMQ_USERNAME: "user"
-    AMQ_PASSWORD: "bitnami"
     AMQ_TRANSPORT: "tcp"
-    ENCRYPTION_KEY: "your-encryption-key"
-    TRACTION_DEFAULT_TENANT_ID: "your-tenant-id"
-    TRACTION_DEFAULT_WALLET_ID: "your-wallet-id"
-    TRACTION_DEFAULT_API_KEY: "your-api-key"
+    # AMQ_PASSWORD: from secret
+    
+    # Encryption
+    # ENCRYPTION_KEY: from secret
+    
+    # Traction configuration (from secrets)
+    # TRACTION_DEFAULT_TENANT_ID: from secret
+    # TRACTION_DEFAULT_WALLET_ID: from secret
+    # TRACTION_DEFAULT_API_KEY: from secret
+    # TRACTION_DEFAULT_API_URL: from secret
+    TRACTION_FIXED_SHOWCASE_API_URL: "https://api.bc-wallet-demo.dev.nborbit.ca"
 
   # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
