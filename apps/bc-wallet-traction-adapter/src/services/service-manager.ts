@@ -1,7 +1,7 @@
 import type { Buffer } from 'buffer'
 import { LRUCache } from 'lru-cache'
 
-import { environment } from '../environment'
+import { DEBUG_ENABLED, environment } from '../environment'
 import { decryptBufferAsString } from '../util/CypherUtil'
 import { ShowcaseApiService } from './showcase-api-service'
 import { UpdatedTokens, TractionService } from './traction-service'
@@ -37,7 +37,12 @@ class ServiceManager {
         service.updateBearerToken(await service.getTenantToken(environment.traction.TRACTION_DEFAULT_API_KEY))
       }*/
       // -> Alternative logic
-      if (!(await service.hasBearerToken()) && environment.traction.TRACTION_DEFAULT_API_KEY) {
+      const hasBearerToken = await service.hasBearerToken()
+      if (DEBUG_ENABLED) {
+        console.debug('Traction service has valid token:', hasBearerToken)
+      }
+
+      if (!hasBearerToken && environment.traction.TRACTION_DEFAULT_API_KEY) {
         const freshTractionToken = await service.getTenantToken(environment.traction.TRACTION_DEFAULT_API_KEY)
         updatedTokens.tractionToken = freshTractionToken
       }

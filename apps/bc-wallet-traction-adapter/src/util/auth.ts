@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer'
 
+import { DEBUG_ENABLED } from '../environment'
 import { Claims } from '../types/auth/claims'
 
 export function isAccessTokenExpired(token: Token): boolean {
@@ -8,6 +9,10 @@ export function isAccessTokenExpired(token: Token): boolean {
   if (!token.claims.exp) {
     console.warn('Token does not contain an expiration date, assuming it is expired.')
     return true
+  }
+
+  if (DEBUG_ENABLED) {
+    console.debug('Current token expires at', token.claims.exp)
   }
 
   return currentTime > token.claims.exp - 10

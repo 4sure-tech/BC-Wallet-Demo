@@ -231,6 +231,10 @@ export class TractionService extends ApiService {
       return Promise.reject(Error(`The Indy ledger only supports DID identifiers for schemas.`))
     }
 
+    if (DEBUG_ENABLED) {
+      console.debug('Calling schemaStoragePost with config', (this.schemaStorageApi as any).configuration)
+    }
+
     const record = await withRetry(
       () => this.schemaStorageApi.schemaStoragePost({ body: { schemaId } }),
       'schemaStoragePost',
