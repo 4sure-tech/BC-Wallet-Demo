@@ -239,6 +239,9 @@ export class TractionService extends ApiService {
       () => this.schemaStorageApi.schemaStoragePost({ body: { schemaId } }),
       'schemaStoragePost',
     )
+    if (DEBUG_ENABLED) {
+      console.debug('schemaStoragePost returned:', record)
+    }
     if (!record.schema) {
       return Promise.reject(Error(`No schema was returned for identifier ${schemaId}.`))
     }
@@ -278,6 +281,9 @@ export class TractionService extends ApiService {
       () => this.credentialDefApi.credentialDefinitionsCredDefIdGet({ credDefId: definitionId }),
       'credentialDefinitionsCredDefIdGet',
     )
+    if (DEBUG_ENABLED) {
+      console.debug('credentialDefinitionsCredDefIdGet returned:', record)
+    }
     if (record.credentialDefinition) {
       if (!record.credentialDefinition.schemaId) {
         return Promise.reject(

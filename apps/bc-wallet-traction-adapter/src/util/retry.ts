@@ -50,6 +50,9 @@ export async function withRetry<T>(
       return await operation()
     } catch (error) {
       lastError = error
+      if (DEBUG_ENABLED) {
+        console.error(`${operationName} failed `, error)
+      }
 
       if (attempt === maxRetries) {
         break
