@@ -232,7 +232,13 @@ export class TractionService extends ApiService {
     }
 
     if (DEBUG_ENABLED) {
-      console.debug('Calling schemaStoragePost with config', (this.schemaStorageApi as any).configuration)
+      const conf = (this.schemaStorageApi as any).configuration as ConfigurationParameters
+      console.debug('Calling schemaStoragePost with config', conf)
+      // @ts-ignore
+      const apiKey = conf.apiKey()
+      console.debug('API token is', apiKey)
+      const token = new Token(apiKey)
+      console.debug('token claims:', token.claims)
     }
 
     const record = await withRetry(
@@ -590,7 +596,7 @@ export class TractionService extends ApiService {
       body: request,
     }
     if (DEBUG_ENABLED) {
-      console.debug('Calling multitenancyTenantTenantIdTokenPostRaw with', requestParameters)
+      console.debug('schemaStoragePost', requestParameters)
     }
     const apiResponse = await withRetry(
       () => this.multitenancyApi.multitenancyTenantTenantIdTokenPostRaw(requestParameters),
