@@ -144,6 +144,10 @@ export class TractionService extends ApiService {
    */
   private tokenCallback(token: string) {
     return async (name: string) => {
+      console.debug('tokenCallback name', name)
+      const tokenObj = new Token(token)
+      console.debug('token claims:', tokenObj.claims)
+
       if (name === 'Authorization') {
         return `Bearer ${token}`
       }
@@ -229,16 +233,6 @@ export class TractionService extends ApiService {
     }
     if (importRequest.identifierType !== 'DID') {
       return Promise.reject(Error(`The Indy ledger only supports DID identifiers for schemas.`))
-    }
-
-    if (DEBUG_ENABLED) {
-      const conf = (this.schemaStorageApi as any).configuration as ConfigurationParameters
-      console.debug('Calling schemaStoragePost with config', conf)
-      // @ts-ignore
-      const apiKey = await conf.apiKey()
-      console.debug('API token is', apiKey)
-      const token = new Token(apiKey)
-      console.debug('token claims:', token.claims)
     }
 
     const record = await withRetry(
