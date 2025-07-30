@@ -235,7 +235,7 @@ export class TractionService extends ApiService {
       const conf = (this.schemaStorageApi as any).configuration as ConfigurationParameters
       console.debug('Calling schemaStoragePost with config', conf)
       // @ts-ignore
-      const apiKey = conf.apiKey()
+      const apiKey = await conf.apiKey()
       console.debug('API token is', apiKey)
       const token = new Token(apiKey)
       console.debug('token claims:', token.claims)
