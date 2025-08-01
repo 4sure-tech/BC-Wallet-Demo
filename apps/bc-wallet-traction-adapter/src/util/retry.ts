@@ -18,7 +18,7 @@ async function isRetryableError(error: unknown): Promise<boolean> {
 
   try {
     const errorMessage = await buildHttpErrorMessage(error.response)
-    const timeoutKeywords = ['timeout', 'pool timeout', 'request was interrupted', 'connection timeout']
+    const timeoutKeywords = ['timeout', 'pool timeout', 'request was interrupted', 'connection timeout', 'Unauthorized']
     return timeoutKeywords.some((keyword) => errorMessage.toLowerCase().includes(keyword.toLowerCase()))
   } catch {
     return false
